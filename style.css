@@ -396,6 +396,11 @@
       gap: 16px
     }
 
+    /* групповой заголовок сразу после двухколоночной сетки (внутри грида margin не схлопывается) */
+    .grid-2 + .group-title {
+      margin-top: 8px
+    }
+
     /* ============ КОМАНДНЫЕ КАРТОЧКИ ============ */
     .cmd-card .cmd-head {
       display: flex;
@@ -540,8 +545,9 @@
       border-radius: 12px;
       padding: 14px 16px;
       font-size: .9rem;
+      margin-top: 16px;
       margin-bottom: 16px;
-      border: 1px solid
+      border: 1px solid var(--glass-border)
     }
 
     .callout .co-title {
@@ -1032,18 +1038,31 @@
 
     /* ============ АДАПТИВ ============ */
     @media (max-width:1060px) {
+      /* панель — от шапки до самого низа экрана (без обрезки снизу) */
       .sidenav {
         position: fixed;
         top: var(--header-h);
         right: -290px;
+        bottom: 0;
         width: 280px;
-        height: calc(100vh - var(--header-h));
+        height: auto;
+        max-height: none;
         z-index: 180;
         background: var(--panel-solid);
         border-left: 1px solid var(--glass-border);
-        padding-top: 16px;
+        /* скругление левого края, правый — впритык к краю экрана */
+        border-radius: var(--r) 0 0 var(--r);
+        padding-top: 24px;
+        padding-bottom: 24px;
+        display: flex;
+        flex-direction: column;
         transition: right .25s ease;
         box-shadow: -20px 0 60px rgba(0, 0, 0, .4)
+      }
+
+      /* футер панели — в самом низу (симметричные отступы сверху/снизу) */
+      .sidenav .nav-foot {
+        margin-top: auto
       }
 
       .sidenav.open {
@@ -1084,6 +1103,19 @@
 
       .search-status {
         display: none
+      }
+
+      /* единый ритм блоков в секции «Как пользоваться» на узких экранах — везде 16 px */
+      #howto .sec-sub {
+        margin-bottom: 16px
+      }
+
+      #howto .grid-2 > .card {
+        margin-bottom: 0
+      }
+
+      #howto .grid-2 + .group-title {
+        margin-top: 16px
       }
     }
 

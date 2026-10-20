@@ -9,7 +9,7 @@
     content="Практичная одностраничная памятка по кибербезопасности: Linux, разведка, атака, защита, one-liners и песочница.">
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235b8cff' d='M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -73,7 +73,7 @@
         <div class="sec-head"><span class="sec-num">01</span>
           <h2 class="sec-title">Как пользоваться памяткой · Карта местности</h2>
         </div>
-        <p class="sec-sub">Не зубри всё подряд. Начни с Linux, затем переходи к сетям — дальше разведка и атака/защита
+        <p class="sec-sub">Начнем с Linux, затем переходим к сетям — дальше разведка и атака/защита
           уже «собираются» сами.</p>
 
         <div class="legal">
@@ -107,14 +107,15 @@
           </div>
         </div>
 
-        <h3 class="group-title" style="margin-top:8px">Мини-глоссарий</h3>
+        <h3 class="group-title">Мини-глоссарий</h3>
         <div class="glossary">
           <div class="term"><b>CVE</b> — уникальный номер уязвимости (Common Vulnerabilities and Exposures). Ищешь CVE →
             ищешь патч или эксплойт. <a href="#resources">→ ресурсы</a></div>
           <div class="term"><b>Payload</b> — полезная нагрузка: код/команда, которую атакующий доставляет жертве (shell,
             скрипт). <a href="#attack">→ атака</a></div>
           <div class="term"><b>Privilege Escalation</b> — повышение привилегий: из обычного пользователя до root/admin.
-            <a href="#privesc">→ privesc</a></div>
+            <a href="#privesc">→ privesc</a>
+          </div>
           <div class="term"><b>Zero-day</b> — уязвимость, о которой вендор ещё не знает (или не выпустил патч). <a
               href="#defense">→ защита</a></div>
           <div class="term"><b>Phishing</b> — социальная инженерия: жертва сама «открывает дверь» по ссылке/письму. <a
@@ -156,7 +157,8 @@
             <ul class="clean">
               <li><b>Bash:</b> циклы, функции, обработка вывода команд — автоматизация рутины и парсинг логов.</li>
               <li><b>Python:</b> <code>requests</code> (HTTP), <code>socket</code>/<code>scapy</code> (сети),
-                <code>paramiko</code> (SSH). Скрипт = твой личный инструмент под задачу.</li>
+                <code>paramiko</code> (SSH). Скрипт = твой личный инструмент под задачу.
+              </li>
               <li><b>Проверка себя:</b> написать скрипт, который сам сканирует порты и сохраняет результат в CSV.</li>
             </ul>
           </div>
@@ -230,7 +232,8 @@
           <pre class="code">ls -la
 ls -lah /var/log</pre>
           <p class="cmd-note"><b>-l</b> — подробный вывод (права, владелец, размер), <b>-a</b> — включая скрытые,
-            <b>-h</b> — человекочитаемые размеры.</p>
+            <b>-h</b> — человекочитаемые размеры.
+          </p>
           <div class="tags"><span class="tag-link" data-tag="linux">#linux</span><span class="tag-link"
               data-tag="files">#files</span></div>
         </article>
@@ -364,7 +367,8 @@ lsof +D /var/www          # всё открытое в каталоге</pre>
           скорость реакции при инциденте.</div>
         <div class="callout err"><span class="co-title">Типичная ошибка</span>Запускать <code>find / …</code> или
           <code>grep -r … /etc</code> без <code>2&gt;/dev/null</code> и без понимания, что рекурсивный поиск по всей
-          системе — медленно и может «загрузить» сервер. Сначала сужай каталог.</div>
+          системе — медленно и может «загрузить» сервер. Сначала сужай каталог.
+        </div>
       </section>
 
       <!--SEC-recon-->
@@ -401,7 +405,8 @@ nmap -sV -sC target_ip                  # версии сервисов + деф
 nmap -p- --min-rate=5000 target_ip      # все 65535 портов, быстро
 nmap -O target_ip                       # определение ОС (точнее от root)</pre>
           <p class="cmd-note"><b>-sV</b> — версия сервиса, <b>-sC</b> — дефолтные скрипты NSE, <b>-p-</b> — все порты,
-            <b>-O</b> — OS fingerprinting. Результат: что открыто и какие версии.</p>
+            <b>-O</b> — OS fingerprinting. Результат: что открыто и какие версии.
+          </p>
           <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
               data-tag="network">#network</span></div>
         </article>
@@ -562,7 +567,8 @@ id                               # кто я? какие группы? (docker =
 uname -a                         # версия ядра → CVE по LPE-базам</pre>
           <p class="cmd-note">Классика: <code>sudo vim</code> → <code>:!/bin/sh</code>; SUID на <code>find</code> →
             <code>find / -exec /bin/sh \; -quit</code>; доступ к группе <code>docker</code> → контейнер с монтированным
-            <code>/</code>.</p>
+            <code>/</code>.
+          </p>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
               data-tag="privesc">#privesc</span></div>
         </article>
@@ -899,7 +905,8 @@ journalctl --list-boots                 # история загрузок</pre>
 
         <p class="cmd-note">Поддерживаются:
           <code>help, ls, cd, cat, pwd, whoami, id, uname, ps, ss, grep, find, chmod, history, clear</code>. Файловая
-          система — фейковая (несколько каталогов и файлов). Команды вне списка честно сообщают «command not found».</p>
+          система — фейковая (несколько каталогов и файлов). Команды вне списка честно сообщают «command not found».
+        </p>
         <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Это реальный Linux?» Нет — это
           тренажёр для отработки мышечной памяти: синтаксис, флаги, пайплайны. Настоящая практика — в Docker-контейнере
           или на VPS (только своих!).</div>
@@ -957,7 +964,8 @@ sqlmap -u "http://shop.example.com/admin/login.php?user=admin" --dbs
 # Теперь у атакующего есть shell обычного пользователя www-data</pre>
             <div class="sc-defender"><b>Видит защитник:</b> новый файл panel.php, созданный процессом apache2 (проверка:
               <code>find /var/www -mtime -1</code>, мониторинг создания файлов). Реакция: удалить файл, закрыть SQLi,
-              сменить пароли БД.</div>
+              сменить пароли БД.
+            </div>
           </div>
         </div>
 

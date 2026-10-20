@@ -90,6 +90,62 @@ ok('sandbox ls lists files', /notes\.txt|ssh/.test(out));
 await ev(`(() => { const i = document.querySelector('#termInput'); i.value = 'clear'; i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })); return 1; })()`);
 ok('sandbox clear empties output', (await ev(`document.querySelector('#termBody').textContent.trim().length`)) === 0);
 
+// S12 — мобильная кнопка поиска (≤720px): скрыта на десктопе, панель открывается/закрывается, Esc, клик вне, бургер
+await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+await sleep(400);
+ok('search button hidden at >720px', await ev(`getComputedStyle(document.querySelector('#mobileSearchBtn')).display === 'none'`));
+await ev(`(() => { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); return 1; })()`); /* сброс фокуса: после S8/S9 он в #termInput, а «/» внутри полей не перехватывается */
+await ev(`document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '/', bubbles: true })); 1`);
+await sleep(250);
+ok('/ hotkey: no panel on desktop, focus in search input', await ev(`!document.getElementById('siteHeader').classList.contains('search-open') && document.activeElement === document.querySelector('#searchInput')`));
+
+await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 800, deviceScaleFactor: 2, mobile: false });
+await sleep(500);
+ok('at ≤720px button visible and immediately left of theme button', await ev(`(() => { const b = document.querySelector('#mobileSearchBtn'); return getComputedStyle(b).display !== 'none' && b.nextElementSibling === document.getElementById('themeBtn'); })()`));
+ok('search button sits visually right next to theme button (no auto-margin gap)', await ev(`(() => { const r1 = document.querySelector('#mobileSearchBtn').getBoundingClientRect(); const r2 = document.getElementById('themeBtn').getBoundingClientRect(); return Math.abs((r2.left - r1.right) - 14) <= 6; })()`));
+
+await ev(`document.querySelector('#mobileSearchBtn').click(); 1`);
+await sleep(500);
+ok('panel opens: search-open, aria-expanded=true, max-height expanded', await ev(`(() => { const h = document.getElementById('siteHeader'), b = document.querySelector('#mobileSearchBtn'); return h.classList.contains('search-open') && b.getAttribute('aria-expanded') === 'true' && getComputedStyle(document.querySelector('.search-wrap')).maxHeight === '96px'; })()`));
+ok('focus moved to search input on open', await ev(`document.activeElement === document.querySelector('#searchInput')`));
+
+const totalBlocks = await ev(`[...document.querySelectorAll('.block')].length`);
+await ev(`(() => { const i = document.querySelector('#searchInput'); i.value = 'nmap'; i.dispatchEvent(new Event('input')); return 1; })()`);
+await sleep(350);
+ok('typing in mobile panel filters sections', await ev(`[...document.querySelectorAll('.block')].filter(s => s.offsetWidth > 0).length < ${totalBlocks}`));
+
+/* blur field → Esc outside closes the panel (query preserved) */
+await ev(`document.querySelector('#searchInput').blur(); document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); 1`);
+await sleep(500);
+ok('Esc outside input closes mobile panel, query preserved', await ev(`(() => { const h = document.getElementById('siteHeader'), i = document.querySelector('#searchInput'); return !h.classList.contains('search-open') && getComputedStyle(document.querySelector('.search-wrap')).visibility === 'hidden' && i.value === 'nmap'; })()`));
+
+/* reopen → Esc while focused in input: clears text, blurs, but panel stays open */
+await ev(`document.querySelector('#mobileSearchBtn').click(); 1`);
+await sleep(500);
+ok('reopen: focus back in input', await ev(`document.activeElement === document.querySelector('#searchInput') && document.getElementById('siteHeader').classList.contains('search-open')`));
+await ev(`document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); 1`);
+await sleep(350);
+ok('Esc in input clears text and blurs, panel stays open, filters reset', await ev(`(() => { const i = document.querySelector('#searchInput'); return i.value === '' && document.activeElement !== i && document.getElementById('siteHeader').classList.contains('search-open') && [...document.querySelectorAll('.block')].filter(s => s.offsetWidth > 0).length >= ${totalBlocks}; })()`));
+
+/* outside click closes the panel */
+await ev(`(() => { const t = document.createElement('div'); t.style.cssText = 'position:fixed;left:10px;top:200px;width:40px;height:40px;background:red;z-index:5'; document.body.appendChild(t); t.click(); t.remove(); return 1; })()`);
+await sleep(500);
+ok('click outside closes mobile panel', await ev(`!document.getElementById('siteHeader').classList.contains('search-open') && document.querySelector('#mobileSearchBtn').getAttribute('aria-expanded') === 'false'`));
+
+/* burger opening the menu simultaneously closes the search panel */
+await ev(`document.querySelector('#mobileSearchBtn').click(); 1`);
+await sleep(500);
+ok('panel open before burger', await ev(`document.getElementById('siteHeader').classList.contains('search-open')`));
+await ev(`document.querySelector('#burgerBtn').click(); 1`);
+await sleep(400);
+ok('burger opens menu and closes search panel', await ev(`document.querySelector('#sidenav').classList.contains('open') && !document.getElementById('siteHeader').classList.contains('search-open')`));
+await ev(`document.querySelector('#burgerBtn').click(); 1`);
+await sleep(300);
+ok('menu closed, search stays closed', await ev(`!document.querySelector('#sidenav').classList.contains('open') && !document.getElementById('siteHeader').classList.contains('search-open')`));
+
+await send('Emulation.clearDeviceMetricsOverride');
+await sleep(400);
+
 // S10 — нет JS-ошибок на странице
 ok('no uncaught JS errors', jsErrors === 0);
 

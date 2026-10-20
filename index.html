@@ -14,7 +14,7 @@
 
 <body>
 
-  <header class="site-header">
+  <header id="siteHeader" class="site-header">
     <a class="logo" href="#howto">
       <svg width="26" height="26" viewBox="0 0 24 24">
         <path fill="var(--accent)" d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z" />
@@ -22,7 +22,7 @@
       </svg>
       CyberSec Cheat Sheet <span class="ver">v1.0</span>
     </a>
-    <div class="search-wrap">
+    <div class="search-wrap" id="searchWrap">
       <span class="s-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2">
           <circle cx="11" cy="11" r="7" />
@@ -33,6 +33,9 @@
     </div>
     <button id="filterChip" class="filter-chip" title="Сбросить фильтр по тегу"></button>
     <span id="searchStatus" class="search-status"></span>
+    <button id="mobileSearchBtn" class="icon-btn mobile-search-btn" type="button" title="Поиск по памятке" aria-label="Открыть поиск" aria-expanded="false" aria-controls="searchWrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    </button>
     <button id="themeBtn" class="icon-btn" title="Переключить тему" aria-label="Тема">
       <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />

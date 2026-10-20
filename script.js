@@ -10,29 +10,6 @@
     applyTheme(localStorage.getItem('csc-theme') || 'dark');
     themeBtn.addEventListener('click', () => { const cur = document.documentElement.dataset.theme; const next = cur === 'dark' ? 'light' : 'dark'; localStorage.setItem('csc-theme', next); applyTheme(next); });
 
-    /* favorites */
-    const FAV_KEY = 'csc-favorites';
-    let favorites = []; try { favorites = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch (e) { favorites = []; }
-    function saveFavs() { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); renderFavBadge(); }
-    function isFav(id) { return favorites.some(f => f.id === id); }
-    function toggleFav(card) {
-      const id = card.id;
-      if (isFav(id)) { favorites = favorites.filter(f => f.id !== id); toast('Убрано из избранного'); }
-      else {
-        const title = $('.cmd-head h3', card).textContent.trim();
-        const code = $('pre.code', card).textContent.trim();
-        const tags = card.dataset.tags || '';
-        favorites.push({ id, title, code, tags });
-        toast('Добавлено в избранное');
-      }
-      saveFavs(); renderCardButtons(); renderFavList();
-    }
-    function renderFavBadge() {
-      const b = $('#favCount'), n = favorites.length;
-      b.textContent = n; b.classList.toggle('hidden', n === 0);
-      $('#favCount2').textContent = n;
-    }
-
     /* card action buttons */
     function renderCardButtons() {
       $$('.cmd-card').forEach(card => {
@@ -42,12 +19,9 @@
           bar = document.createElement('div'); bar.className = 'card-actions';
           const mk = (cls, title, svg) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn ' + cls; b.title = title; b.innerHTML = svg; return b; };
           bar.appendChild(mk('act-copy', 'Копировать команду', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>'));
-          bar.appendChild(mk('act-fav', 'В избранное', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'));
           bar.appendChild(mk('act-link', 'Скопировать ссылку на блок', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg>'));
           (head || card).appendChild(bar);
         }
-        const favBtn = $('.act-fav', bar);
-        if (favBtn) favBtn.classList.toggle('on', isFav(card.id));
       });
     }
 
@@ -56,7 +30,6 @@
       if (!btn) return;
       const card = btn.closest('.cmd-card');
       if (btn.classList.contains('act-copy')) { copyText($('pre.code', card).textContent.trim(), 'Скопировано!'); btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 1200); }
-      else if (btn.classList.contains('act-fav')) toggleFav(card);
       else if (btn.classList.contains('act-link')) {
         const url = location.origin + location.pathname + '#' + card.id;
         copyText(url, 'Ссылка скопирована!');
@@ -75,46 +48,6 @@
       try { document.execCommand('copy'); toast(msg); } catch (e) { toast('Не удалось скопировать'); }
       ta.remove();
     }
-
-    /* favorites modal + export */
-    const favModal = $('#favModal'), favList = $('#favList');
-    function renderFavList() {
-      $('#favCount2').textContent = favorites.length;
-      if (!favorites.length) { favList.innerHTML = '<p class="empty">Пока пусто. Нажми на звёздочку у любой карточки с командой.</p>'; return; }
-      favList.innerHTML = '';
-      favorites.forEach((f, i) => {
-        const item = document.createElement('div'); item.className = 'fav-item';
-        const h = document.createElement('h4'); h.textContent = f.title;
-        const pre = document.createElement('pre'); pre.className = 'code mini'; pre.textContent = f.code;
-        const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'icon-btn act-fav'; rm.title = 'Убрать';
-        rm.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-        rm.addEventListener('click', () => { favorites.splice(i, 1); saveFavs(); renderCardButtons(); renderFavList(); });
-        item.append(h, pre, rm); favList.appendChild(item);
-      });
-    }
-    $('#favBtn').addEventListener('click', () => { renderFavList(); favModal.classList.remove('hidden'); });
-    $('#favClose').addEventListener('click', () => favModal.classList.add('hidden'));
-    favModal.addEventListener('click', e => { if (e.target === favModal) favModal.classList.add('hidden'); });
-
-    function download(name, content) {
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    }
-    $('#exportTxt').addEventListener('click', () => {
-      if (!favorites.length) return toast('Избранное пусто');
-      const txt = 'CyberSec Cheat Sheet - избранное\n' + '='.repeat(40) + '\n\n' + favorites.map(f => '# ' + f.title + '\n' + f.code).join('\n\n') + '\n';
-      download('cybersec-favorites.txt', txt); toast('Экспортировано .txt');
-    });
-    $('#exportMd').addEventListener('click', () => {
-      if (!favorites.length) return toast('Избранное пусто');
-      const md = '# CyberSec Cheat Sheet - избранное\n\n' + favorites.map(f => '## ' + f.title + '\n\n```bash\n' + f.code + '\n```').join('\n\n') + '\n';
-      download('cybersec-favorites.md', md); toast('Экспортировано .md');
-    });
-    $('#favClear').addEventListener('click', () => {
-      if (!favorites.length) return;
-      favorites = []; saveFavs(); renderCardButtons(); renderFavList(); toast('Избранное очищено');
-    });
 
     /* search + tag filter */
     const searchInput = $('#searchInput'), searchStatus = $('#searchStatus'), filterChip = $('#filterChip');
@@ -165,8 +98,7 @@
         e.preventDefault(); searchInput.focus(); searchInput.select();
       }
       if (e.key === 'Escape') {
-        if (!favModal.classList.contains('hidden')) favModal.classList.add('hidden');
-        else { searchInput.value = ''; query = ''; applyFilters(); searchInput.blur(); }
+        searchInput.value = ''; query = ''; applyFilters(); searchInput.blur();
       }
     });
 
@@ -303,7 +235,6 @@
 
     /* init */
     renderCardButtons();
-    renderFavBadge();
     print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).');
     print('Введи help для списка команд.');
     onScroll();

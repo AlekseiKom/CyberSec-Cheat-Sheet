@@ -262,27 +262,6 @@
       height: 18px
     }
 
-    #favBtn .badge {
-      position: absolute;
-      top: -7px;
-      right: -7px;
-      min-width: 19px;
-      height: 19px;
-      border-radius: 99px;
-      padding: 0 5px;
-      background: var(--accent);
-      color: #fff;
-      font-size: .7rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center
-    }
-
-    #favBtn .badge.hidden {
-      display: none
-    }
-
     /* ============ РАСКЛАДКА / НАВИГАЦИЯ ============ */
     .layout {
       max-width: 1380px;
@@ -470,11 +449,6 @@
     .cmd-card .icon-btn svg {
       width: 16px;
       height: 16px
-    }
-
-    .icon-btn.act-fav.on {
-      color: var(--amber);
-      border-color: rgba(255, 200, 87, .5)
     }
 
     .icon-btn.copied {
@@ -752,6 +726,7 @@
 
     .term-input input {
       flex: 1;
+      min-width: 0;
       background: none;
       border: none;
       outline: none;
@@ -858,7 +833,90 @@
       letter-spacing: .06em
     }
 
-    /* ============ ИЗБРАННОЕ (МОДАЛКА) / ЧИП ФИЛЬТРА ============ */
+    /* ============ МОБИЛЬНЫЙ СТЕК ТАБЛИЦ .stack-sm (≤520px) ============ */
+    @media (max-width: 520px) {
+      table.stack-sm,
+      table.stack-sm tbody,
+      table.stack-sm tr,
+      table.stack-sm td {
+        display: block;
+        width: 100%
+      }
+
+      /* строка-заголовок скрывается — подписи дублируются над ячейками */
+      table.stack-sm tbody tr:first-child {
+        display: none
+      }
+
+      table.stack-sm tr:not(:first-child) {
+        margin-bottom: 12px;
+        padding: 4px 16px 8px;
+        background: var(--panel);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px
+      }
+
+      table.stack-sm tr:last-child {
+        margin-bottom: 0
+      }
+
+      table.stack-sm td {
+        padding: 7px 0;
+        border-bottom: none;
+        font-size: .86rem
+      }
+
+      table.stack-sm td::before {
+        display: block;
+        margin-bottom: 3px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--dim)
+      }
+
+      /* подписи колонок — по позициям в разметке */
+      #roadmap-3 table.stack-sm td:nth-child(1)::before { content: "Путь"; }
+      #roadmap-3 table.stack-sm td:nth-child(2)::before { content: "Суть"; }
+      #roadmap-3 table.stack-sm td:nth-child(3)::before { content: "Ключевые навыки и инструменты"; }
+      .tools-table td:nth-child(1)::before { content: "Инструмент"; }
+      .tools-table td:nth-child(2)::before { content: "Назначение"; }
+      .tools-table td:nth-child(3)::before { content: "Когда использовать"; }
+
+      /* карточка roadmap-шага на узком экране */
+      .roadmap-step { gap: 10px; }
+      .step-num { width: 36px; height: 36px; font-size: 1rem; }
+    }
+
+    /* ============ МОБИЛЬНЫЕ НУМЕРОВАННЫЕ КАРТОЧКИ (≤720px) ============ */
+    /* номер + заголовок в одной строке, содержимое — во всю ширину ниже */
+    @media (max-width: 720px) {
+      .roadmap-step,
+      .scenario-step {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 12px;
+        row-gap: 10px;
+        align-items: center
+      }
+
+      /* внутренняя обёртка становится прозрачной для сетки */
+      .roadmap-step > :nth-child(2),
+      .scenario-step .sc-body { display: contents; }
+
+      /* заголовок — в строке с номером, всё остальное — во всю ширину блока */
+      .roadmap-step h3,
+      .scenario-step h3 { margin: 0; }
+
+      .roadmap-step > :nth-child(2) > *:not(:first-child),
+      .scenario-step .sc-body > *:not(:first-child) {
+        grid-column: 1 / -1;
+        margin-top: 0
+      }
+    }
+
+    /* ============ ОВЕРЛЕЙ МОБИЛЬНОГО МЕНЮ / ЧИП ФИЛЬТРА ============ */
     .overlay {
       position: fixed;
       inset: 0;
@@ -875,96 +933,6 @@
       pointer-events: auto
     }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(2, 4, 10, .6);
-      backdrop-filter: blur(3px);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px
-    }
-
-    .modal {
-      width: min(540px, 94vw);
-      max-height: 84vh;
-      background: var(--panel-solid);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--glass-border)
-    }
-
-    .modal-head h3 {
-      font-size: 1.05rem;
-      flex: 1;
-      margin: 0
-    }
-
-    .modal-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 20px
-    }
-
-    .modal-foot {
-      padding: 14px 20px;
-      border-top: 1px solid var(--glass-border);
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap
-    }
-
-    .fav-item {
-      background: rgba(96, 140, 255, .07);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      font-size: .85rem
-    }
-
-    .fav-item h4 {
-      font-weight: 700;
-      margin-bottom: 6px
-    }
-
-    .fav-item pre.code.mini {
-      display: block;
-      background: var(--code-bg);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: .8rem;
-      color: #cfe0ff;
-      overflow-x: auto;
-      white-space: pre;
-      margin-bottom: 8px
-    }
-
-    .fav-item .act-fav {
-      width: 26px;
-      height: 26px;
-      border-radius: 7px
-    }
-
-    .empty {
-      color: var(--dim);
-      text-align: center;
-      padding: 18px 0;
-      font-size: .9rem
-    }
 
     .toast {
       position: fixed;
@@ -1058,8 +1026,8 @@
       border-top: 1px solid var(--glass-border)
     }
 
-    #burgerBtn {
-      display: none
+    #themeBtn {
+      margin-left: auto
     }
 
     /* ============ АДАПТИВ ============ */
@@ -1067,23 +1035,19 @@
       .sidenav {
         position: fixed;
         top: var(--header-h);
-        left: -290px;
+        right: -290px;
         width: 280px;
         height: calc(100vh - var(--header-h));
         z-index: 180;
         background: var(--panel-solid);
-        border-right: 1px solid var(--glass-border);
+        border-left: 1px solid var(--glass-border);
         padding-top: 16px;
-        transition: left .25s ease;
-        box-shadow: 20px 0 60px rgba(0, 0, 0, .4)
+        transition: right .25s ease;
+        box-shadow: -20px 0 60px rgba(0, 0, 0, .4)
       }
 
       .sidenav.open {
-        left: 0
-      }
-
-      #burgerBtn {
-        display: inline-flex
+        right: 0
       }
 
       .logo .ver {
@@ -1120,5 +1084,36 @@
 
       .search-status {
         display: none
+      }
+    }
+
+    /* ============ ШАПКА НА УЗКИХ ЭКРАНАХ: ПОИСК НА ВТОРОЙ СТРОКЕ (≤720px) ============ */
+    @media (max-width: 720px) {
+      :root { --header-h: 112px; }
+
+      .site-header {
+        flex-wrap: wrap;
+        align-content: center;
+        row-gap: 8px;
+        gap: 10px;
+        height: auto;
+        min-height: var(--header-h);
+        padding: 10px clamp(12px, 3vw, 16px) 12px
+      }
+
+      .icon-btn { width: 32px; height: 32px; }
+
+      .logo { font-size: .98rem; gap: 8px; }
+
+      .search-wrap {
+        order: 1;
+        flex-basis: 100%;
+        max-width: none;
+        margin-left: 0
+      }
+
+      #searchInput {
+        padding-right: 14px;
+        font-size: .9rem
       }
     }

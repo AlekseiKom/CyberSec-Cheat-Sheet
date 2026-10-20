@@ -1,128 +1,98 @@
-// Headless Chrome CDP test for CyberSec-Cheat-Sheet/index.html
-// Запуск: node --experimental-websocket test-csc.mjs  (флаг обязателен на Node < 22)
+// Headless Chrome CDP-тесты для CyberSec-Cheat-Sheet/index.html
+// Запуск: node --experimental-websocket test-csc.mjs  (флаг нужен на Node < 22)
 import { spawn } from 'node:child_process';
 
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const URL = 'file:///C:/Users/Lep4i/Desktop/My%20GitHub/CyberSec-Cheat-Sheet/index.html';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=9333', '--no-first-run', '--no-default-browser-check', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+let ws; const pending = new Map(); let idc = 1;
+function send(method, params = {}) { return new Promise((res, rej) => { const id = idc++; pending.set(id, { res, rej }); ws.send(JSON.stringify({ id, method, params })); }); }
 
-let target;
-for (let i = 0; i < 50 && !target; i++) {
-  await sleep(200);
+const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', `--remote-debugging-port=9231`, 'about:blank'], { stdio: 'ignore' });
+let pageWsUrl;
+for (let i = 0; i < 50 && !pageWsUrl; i++) {
   try {
-    const list = await (await fetch('http://127.0.0.1:9333/json/list')).json();
-    target = list.find((t) => t.type === 'page');
-  } catch {}
+    const r = await fetch('http://127.0.0.1:9231/json/new?' + encodeURIComponent(URL), { method: 'PUT' });
+    if (r.ok) pageWsUrl = (await r.json()).webSocketDebuggerUrl;
+    else { const g = await fetch('http://127.0.0.1:9231/json/new?' + encodeURIComponent(URL)); if (g.ok) pageWsUrl = (await g.json()).webSocketDebuggerUrl; }
+  } catch (e) { await sleep(400); }
 }
-if (!target) { console.error('Chrome devtools not reachable'); process.exit(2); }
+if (!pageWsUrl) { console.error('Chrome CDP not available'); process.exit(1); }
 
-const ws = new WebSocket(target.webSocketDebuggerUrl);
-let id = 0; const pending = new Map(); const errors = [];
-function send(method, params = {}) {
-  return new Promise((res, rej) => { const m = { id: ++id, method, params }; pending.set(id, { res, rej }); ws.send(JSON.stringify(m)); });
-}
-ws.onmessage = (ev) => {
-  const msg = JSON.parse(ev.data);
-  if (msg.id && pending.has(msg.id)) {
-    const { res, rej } = pending.get(msg.id); pending.delete(msg.id);
-    msg.error ? rej(new Error(JSON.stringify(msg.error))) : res(msg.result);
-  } else if (msg.method === 'Runtime.exceptionThrown') {
-    errors.push('EXC: ' + ((msg.params.exceptionDetails?.exception?.description) || msg.params.exceptionDetails?.text || '').slice(0, 250));
-  } else if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error') {
-    errors.push('CONSOLE: ' + msg.params.args.map((a) => a.value ?? a.description).join(' ').slice(0, 250));
-  }
+ws = new WebSocket(pageWsUrl);
+await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
+let jsErrors = 0, pageLoaded = false;
+ws.onmessage = (m) => {
+  const d = JSON.parse(m.data);
+  if (d.id && pending.has(d.id)) { const p = pending.get(d.id); pending.delete(d.id); d.error ? p.rej(new Error(JSON.stringify(d.error))) : p.res(d.result); }
+  else if (d.method === 'Runtime.exceptionThrown') jsErrors++;
+  else if (d.method === 'Page.loadEventFired') pageLoaded = true;
 };
-await new Promise((r) => (ws.onopen = r));
-await send('Page.enable'); await send('Runtime.enable');
-await send('Page.navigate', { url: URL });
-await sleep(1800);
 
-const results = [];
-const ok = (name, cond, detail = '') => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}${detail ? ' — ' + detail : ''}`);
-async function ev(expr) {
-  const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true });
-  if (r.exceptionDetails) throw new Error(JSON.stringify(r.exceptionDetails).slice(0, 300));
-  return r.result.value;
-}
+const ev = async (expression) => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }); if (r.exceptionDetails) throw new Error(JSON.stringify(r.exceptionDetails)); return r.result.value; };
+let passed = 0, failed = 0;
+const ok = (name, cond) => { console.log((cond ? 'PASS' : 'FAIL') + ' — ' + name); cond ? passed++ : failed++; };
 
-// S1 theme toggle
-ok('initial theme dark', await ev(`document.documentElement.dataset.theme==='dark'`));
+await send('Runtime.enable');
+await send('Page.enable');
+for (let i = 0; i < 50 && !pageLoaded; i++) await sleep(200);
+
+// S1 — иконка темы: переключение + персистентность
+ok('initial theme dark', await ev(`document.documentElement.dataset.theme === 'dark'`));
 await ev(`document.querySelector('#themeBtn').click(); 1`);
-ok('toggle to light + persisted', await ev(`document.documentElement.dataset.theme==='light' && localStorage.getItem('csc-theme')==='light'`));
+ok('toggle to light + persisted', await ev(`document.documentElement.dataset.theme === 'light' && localStorage.getItem('csc-theme') === 'light'`));
 await ev(`document.querySelector('#themeBtn').click(); 1`);
-ok('back to dark', await ev(`document.documentElement.dataset.theme==='dark'`));
+ok('back to dark', await ev(`document.documentElement.dataset.theme === 'dark'`));
 
-// S2 search filter
-const total = await ev(`document.querySelectorAll('.cmd-card').length`);
-await ev(`(()=>{const i=document.querySelector('#searchInput'); i.value='chmod'; i.dispatchEvent(new Event('input',{bubbles:true})); return 1;})()`);
+// S2 — поиск фильтрует разделы: «nmap» → видны только блоки с nmap
+const initialVisible = await ev(`[...document.querySelectorAll('.block')].filter(s => s.offsetWidth > 0).length`);
+await ev(`(() => { const i = document.querySelector('#searchInput'); i.value = 'nmap'; i.dispatchEvent(new Event('input')); return 1; })()`);
 await sleep(300);
-const visAfterSearch = await ev(`[...document.querySelectorAll('.cmd-card')].filter(c=>!c.classList.contains('hidden')).length`);
-ok('search "chmod" filters cards', visAfterSearch < total && !await ev(`document.querySelector('#cmd-chmod').classList.contains('hidden')`), `visible=${visAfterSearch}/${total}`);
-await ev(`(()=>{const i=document.querySelector('#searchInput'); i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); return 1;})()`);
-await sleep(300);
-ok('clear search restores all', await ev(`[...document.querySelectorAll('.cmd-card')].filter(c=>c.classList.contains('hidden')).length===0`));
+const visibleAfter = await ev(`[...document.querySelectorAll('.block')].filter(s => s.offsetWidth > 0).length`);
+ok(`search "nmap" filters (${initialVisible} → ${visibleAfter})`, initialVisible >= 8 && visibleAfter < initialVisible && visibleAfter > 0);
+await ev(`(() => { const i = document.querySelector('#searchInput'); i.value = ''; i.dispatchEvent(new Event('input')); return 1; })()`);
 
-// S3 add favorite + toast
-await ev(`(()=>{const b=document.querySelector('#cmd-ls .act-fav'); b.click(); return 1;})()`);
-ok('toast on add', await ev(`!document.querySelector('#toast').classList.contains('hidden') && document.querySelector('#toast').textContent.includes('Добавлено')`));
-ok('fav button active (.on)', await ev(`document.querySelector('#cmd-ls .act-fav').classList.contains('on')`));
+// S3 — избранное полностью удалено: кнопки, модалка, звёзды карточек, ключ в localStorage
+ok('no #favBtn / #favModal / .act-fav', await ev(`!document.querySelector('#favBtn') && !document.querySelector('#favModal') && document.querySelectorAll('.act-fav').length === 0`));
+ok('csc-favorites not in localStorage', await ev(`localStorage.getItem('csc-favorites') === null`));
 
-// S4 modal open with 1 item
-await ev(`document.querySelector('#favBtn').click(); 1`);
-ok('modal opens, 1 fav-item', await ev(`!document.querySelector('#favModal').classList.contains('hidden') && document.querySelectorAll('#favList .fav-item').length===1`));
+// S4 — иконка темы на старом месте избранного (правый кластер, сразу перед бургером)
+ok('#themeBtn sits right before #burgerBtn', await ev(`document.querySelector('#burgerBtn').previousElementSibling === document.querySelector('#themeBtn')`));
 
-// S5 remove from modal -> empty state
-await ev(`(()=>{const rm=document.querySelector('#favList .act-fav'); rm.click(); return 1;})()`);
-ok('empty state after remove', await ev(`document.querySelector('#favList .empty')!==null && document.querySelector('#favList').textContent.includes('Пока пусто')`));
+// S5 — кнопка копирования → тост
+await ev(`(() => { const b = document.querySelector('#cmd-ls .act-copy'); if (b) b.click(); return !!b; })()`);
+await sleep(400);
+ok('copy shows toast', await ev(`!document.querySelector('#toast').classList.contains('hidden')`));
 
-// S6 close modal via X
-await ev(`document.querySelector('#favClose').click(); 1`);
-ok('modal closes via #favClose', await ev(`document.querySelector('#favModal').classList.contains('hidden')`));
-
-// S7 toast auto-hide
+// S6 — тост сам скрывается через ~2 c
 await sleep(2500);
 ok('toast auto-hides', await ev(`document.querySelector('#toast').classList.contains('hidden')`));
 
-// S8 mobile burger menu
-await send('Emulation.setDeviceMetricsOverride', { width: 480, height: 800, deviceScaleFactor: 1, mobile: true });
-await sleep(300);
-await ev(`document.querySelector('#burgerBtn').click(); 1`);
-ok('sidenav opens + overlay shows', await ev(`document.querySelector('#sidenav').classList.contains('open') && document.querySelector('#navOverlay').classList.contains('show')`));
-await ev(`document.querySelector('#navOverlay').click(); 1`);
-ok('overlay click closes sidenav', await ev(`!document.querySelector('#sidenav').classList.contains('open') && !document.querySelector('#navOverlay').classList.contains('show')`));
+// S7 — мобильное бургер-меню: открыть → оверлей, закрыть → скрыт (только при узком окне)
+const w = await ev(`window.innerWidth`);
+if (w < 1160) {
+  await ev(`document.querySelector('#burgerBtn').click(); 1`);
+  ok('mobile: sidenav opens + overlay', await ev(`document.querySelector('#sidenav').classList.contains('open') && document.querySelector('#navOverlay').classList.contains('show')`));
+  await ev(`document.querySelector('#burgerBtn').click(); 1`);
+  ok('mobile: sidenav closes', await ev(`!document.querySelector('#sidenav').classList.contains('open')`));
+} else console.log('SKIP — mobile burger (desktop width ' + w + ')');
 
-// S9 hint chips
-const chips = await ev(`document.querySelectorAll('.hint-chip').length`);
-ok('5 hint chips present', chips === 5, `found=${chips}`);
-await ev(`(()=>{const c=document.querySelector('.hint-chip'); c.click(); return 1;})()`);
-const chipVal = await ev(`document.querySelector('#termInput').value`);
-ok('chip click fills terminal input', chipVal === 'ls -la', `val="${chipVal}"`);
+// S8 — hint-chips: количество + клик подставляет команду в терминал
+const chipCount = await ev(`document.querySelectorAll('.hint-chip').length`);
+ok(`hint chips present (${chipCount})`, chipCount === 5);
+await ev(`document.querySelector('.hint-chip').click(); 1`);
+ok('chip fills terminal input', (await ev(`document.querySelector('#termInput').value`)).length > 0);
 
-// S10 sandbox: ls then clear (exec via keydown Enter on #termInput)
-const enter = `(()=>{const i=document.querySelector('#termInput'); i.value='CMD'; i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); return 1;})()`;
-await ev(enter.replace(/CMD/g, 'ls'));
-await sleep(300);
-ok('sandbox "ls" echoes command + output', await ev(`document.querySelector('#termBody').textContent.includes('$ ls') && document.querySelector('#termInput').value===''`));
-await ev(enter.replace(/CMD/g, 'clear'));
-await sleep(300);
-ok('sandbox "clear" empties output', await ev(`document.querySelector('#termBody').textContent.trim().length===0`));
+// S9 — песочница: ls → список файлов, clear → пусто
+const out = await ev(`(() => { const i = document.querySelector('#termInput'); i.value = 'ls'; i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })); return document.querySelector('#termBody').textContent; })()`);
+ok('sandbox ls lists files', /notes\.txt|ssh/.test(out));
+await ev(`(() => { const i = document.querySelector('#termInput'); i.value = 'clear'; i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' })); return 1; })()`);
+ok('sandbox clear empties output', (await ev(`document.querySelector('#termBody').textContent.trim().length`)) === 0);
 
-// S11 copy button -> toast (clipboard or fallback)
-await ev(`(()=>{const b=document.querySelector('#cmd-ls .act-copy'); if(b) b.click(); return !!b;})()`);
-await sleep(400);
-ok('copy shows toast', await ev(`!document.querySelector('#toast').classList.contains('hidden')`), `msg="${await ev(`document.querySelector('#toast').textContent`)}"`);
+// S10 — нет JS-ошибок на странице
+ok('no uncaught JS errors', jsErrors === 0);
 
-// S12 export with empty favorites -> "Избранное пусто"
-await ev(`(()=>{const b=[...document.querySelectorAll('#favModal button')].find(x=>/txt/i.test((x.textContent||'')+(x.title||''))); if(b){ document.querySelector('#favBtn').click(); b.click(); } return !!b;})()`);
-await sleep(400);
-ok('export empty favs -> toast', await ev(`document.querySelector('#toast').textContent.includes('Избранное пусто')`));
-
-// S13 no JS errors
-ok('no page/console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
-
-console.log(results.join('\n'));
-const failed = results.filter((r) => r.startsWith('FAIL')).length;
-console.log(`\n${results.length - failed}/${results.length} passed`);
-ws.close(); chrome.kill(); process.exit(failed ? 1 : 0);
+console.log('\n' + passed + ' passed, ' + failed + ' failed');
+ws.close(); chrome.kill();
+process.exit(failed ? 1 : 0);

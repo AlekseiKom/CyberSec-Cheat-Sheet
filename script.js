@@ -207,13 +207,39 @@
     function print(html) { const d = document.createElement('div'); d.className = 'sb-line'; d.innerHTML = html; sbOut.appendChild(d); sbOut.scrollTop = sbOut.scrollHeight; }
     function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+    function parseArgs(str) {
+      const matches = str.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+      return matches.map(m => {
+        if ((m.startsWith('"') && m.endsWith('"')) || (m.startsWith("'") && m.endsWith("'"))) {
+          return m.slice(1, -1);
+        }
+        return m;
+      });
+    }
+
     function exec(raw) {
       const line = raw.trim();
       if (!line) return;
-      history.push(line); histPos = history.length - 1;
+      history.push(line);
+      histPos = history.length;
       print('<span class="t-prompt">' + esc(promptStr()) + '</span>' + esc(line));
-      const [cmd, ...args] = line.split(/\s+/);
+
+      // Поддержка пайплайна: cmd1 | grep pattern
+      let mainCmdStr = line;
+      let pipeFilter = null;
+      if (line.includes('|')) {
+        const pipeParts = line.split('|').map(s => s.trim());
+        mainCmdStr = pipeParts[0];
+        const pipeArgs = parseArgs(pipeParts[1] || '');
+        if (pipeArgs[0] === 'grep' && pipeArgs[1]) {
+          pipeFilter = pipeArgs[1];
+        }
+      }
+
+      const args = parseArgs(mainCmdStr);
+      const cmd = args.shift() || '';
       let out = '';
+
       switch (cmd) {
         case 'help': out = 'Доступно: ls, cd, cat, whoami, id, pwd, uname, ps, ss, grep <pattern> <file>, find <path> -name <pattern>, chmod, history, clear, help. Файлы-подсказки: /etc/passwd, /var/log/auth.log, /tmp/exploit.sh'; break;
         case 'pwd': out = cwd; break;
@@ -222,24 +248,40 @@
         case 'history': out = history.map((h, i) => '  ' + (i + 1) + '  ' + h).join('\n'); break;
         case 'clear': sbOut.innerHTML = ''; return;
         case 'ls': {
-          const target = normPath(args[0] || '.');
-          if (FS[target]) { out = FS[target].map(n => { const full = target === '/' ? '/' + n : target + '/' + n; return FS[full] ? n + '/' : n; }).join('  '); }
-          else if (FILES[target]) out = ''; // файл, не каталог
-          else out = 'ls: cannot access "' + (args[0] || '.') + '": No such file or directory'; break;
+          const nonFlags = args.filter(a => !a.startsWith('-'));
+          const target = normPath(nonFlags[0] || '.');
+          if (FS[target]) {
+            out = FS[target].map(n => {
+              const full = target === '/' ? '/' + n : target + '/' + n;
+              return FS[full] ? n + '/' : n;
+            }).join('  ');
+          } else if (FILES[target]) {
+            out = nonFlags[0] || '';
+          } else {
+            out = 'ls: cannot access "' + (nonFlags[0] || '.') + '": No such file or directory';
+          }
+          break;
         }
         case 'cd': {
-          const target = normPath(args[0] || '/');
-          if (FS[target]) { cwd = target; updatePrompt(); } else print('bash: cd: ' + esc(args[0]) + ': No such file or directory'); break;
+          let targetArg = args.find(a => !a.startsWith('-'));
+          if (!targetArg || targetArg === '~') targetArg = '/home/user';
+          const target = normPath(targetArg);
+          if (FS[target]) { cwd = target; updatePrompt(); }
+          else print('bash: cd: ' + esc(args[0] || '') + ': No such file or directory');
+          break;
         }
         case 'cat': {
-          const target = normPath(args[0]);
-          out = FILES[target] !== undefined ? FILES[target] : 'cat: ' + args[0] + ': No such file or directory'; break;
+          const target = normPath(args.find(a => !a.startsWith('-')));
+          out = FILES[target] !== undefined ? FILES[target] : 'cat: ' + (args[0] || '') + ': No such file or directory';
+          break;
         }
         case 'uname': out = 'Linux lab 6.5.0-14-generic #14-Ubuntu SMP x86_64 GNU/Linux'; break;
         case 'ps': out = '  PID TTY          TIME CMD\n  120 ?        00:00:00 sshd\n  456 pts/0    00:00:00 bash\n  789 ?        00:00:01 apache2'; break;
         case 'ss': out = 'State   Recv-Q  Send-Q   Local Address:Port   Peer Address:Port\nLISTEN  0       128      0.0.0.0:22         0.0.0.0:*\nLISTEN  0       128      0.0.0.0:80         0.0.0.0:*'; break;
         case 'grep': {
-          const [pat, file] = args;
+          const nonFlags = args.filter(a => !a.startsWith('-'));
+          const pat = nonFlags[0];
+          const file = nonFlags[1];
           if (!pat || !file) out = 'usage: grep <pattern> <file>';
           else {
             const target = normPath(file);
@@ -249,23 +291,41 @@
           break;
         }
         case 'find': {
-          const start = args[0] ? normPath(args[0]) : cwd;
+          const nonFlags = args.filter(a => !a.startsWith('-') || a === '-name');
+          const start = (args[0] && !args[0].startsWith('-')) ? normPath(args[0]) : cwd;
           let name = null;
-          for (let i = 1; i < args.length - 1; i++) { if (args[i] === '-name') name = args[i + 1]; }
+          for (let i = 0; i < args.length - 1; i++) { if (args[i] === '-name') name = args[i + 1].replace(/['"]/g, ''); }
           if (!name) out = 'usage: find <path> -name <pattern>';
-          else { const all = [...Object.keys(FILES), ...Object.keys(FS).filter(k => k !== '/')]; const matches = all.filter(p => p.startsWith(start) && p.split('/').pop().includes(name)); out = matches.join('\n'); }
+          else {
+            const pattern = name.replace(/\*/g, '');
+            const all = [...Object.keys(FILES), ...Object.keys(FS).filter(k => k !== '/')];
+            const matches = all.filter(p => p.startsWith(start) && p.split('/').pop().includes(pattern));
+            out = matches.join('\n');
+          }
           break;
         }
-        case 'chmod': out = ''; break; // как в реальном bash: успех молча
+        case 'chmod': out = ''; break;
         default: out = 'bash: ' + cmd + ': command not found (это учебная песочница — полный список в help)';
       }
+
+      if (pipeFilter && out) {
+        out = out.split('\n').filter(l => l.includes(pipeFilter)).join('\n');
+      }
+
       if (out !== undefined && out !== '') print(esc(out).replace(/\n/g, '<br>'));
     }
 
     sbInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') { exec(sbInput.value); sbInput.value = ''; }
-      else if (e.key === 'ArrowUp') { if (histPos > 0) { histPos--; sbInput.value = history[histPos]; } }
-      else if (e.key === 'ArrowDown') { if (histPos < history.length - 1) { histPos++; sbInput.value = history[histPos]; } else { histPos = history.length; sbInput.value = ''; } }
+      else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (histPos > 0) { histPos--; sbInput.value = history[histPos]; }
+      }
+      else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (histPos < history.length - 1) { histPos++; sbInput.value = history[histPos]; }
+        else { histPos = history.length; sbInput.value = ''; }
+      }
     });
 
     $('#termForm').addEventListener('submit', e => e.preventDefault());
@@ -273,8 +333,20 @@
     function resetSandbox() { sbOut.innerHTML = ''; cwd = '/home/user'; history = []; histPos = -1; updatePrompt(); print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).'); print('Введи help для списка команд.'); }
     $('#termReset').addEventListener('click', resetSandbox);
 
+    /* back to top */
+    const backToTopBtn = $('#backToTopBtn');
+    if (backToTopBtn) {
+      window.addEventListener('scroll', () => {
+        backToTopBtn.classList.toggle('visible', window.scrollY > 400);
+      }, { passive: true });
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
     /* init */
     renderCardButtons();
     print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).');
     print('Введи help для списка команд.');
     onScroll();
+

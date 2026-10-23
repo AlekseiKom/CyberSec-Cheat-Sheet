@@ -503,9 +503,10 @@ hydra -t 4 -w 10 -V ftp://target_ip</pre>
           <div class="cmd-head">
             <h3>hashcat — взлом хэшей паролей</h3><span class="diff diff-pro">Продвинутый</span>
           </div>
-          <pre class="code">hashcat -m 0 -a 0 hashes.txt rockyou.txt      # md5, прямой перебор
-hashcat -m 1800 -a 0 sha512_hashes.txt rockyou.txt   # bcrypt (медленнее)
-hashcat -m 100 -a 0 nt.hashes rockyou.txt     # NTLM (Windows)</pre>
+          <pre class="code">hashcat -m 0 -a 0 md5_hashes.txt rockyou.txt         # md5, прямой перебор
+hashcat -m 1800 -a 0 shadow_hashes.txt rockyou.txt   # sha512crypt ($6$, Linux shadow)
+hashcat -m 3200 -a 0 bcrypt_hashes.txt rockyou.txt   # bcrypt ($2y$, веб-пароли)
+hashcat -m 1000 -a 0 nt.hashes rockyou.txt           # NTLM (Windows)</pre>
           <p class="cmd-note"><b>-m</b> — тип хэша, <b>-a</b> — режим атаки (0 — словарь, 3 — маска). Если у тебя есть
             дамп БД или /etc/shadow — hashcat решает всё остальное. GPU ускоряет в десятки раз.</p>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
@@ -633,8 +634,8 @@ sudo ufw status verbose</pre>
 sudo iptables -A INPUT -i lo -j ACCEPT
 sudo iptables -P INPUT DROP
 # Лимит попыток SSH (5 новых соединений/минуту с IP):
-sudo iptables -A INPUT -p tcp --dport 22 -m recent --set name=SSH
-sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 6 -j DROP</pre>
+sudo iptables -A INPUT -p tcp --dport 22 -m recent --set --name SSH
+sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 6 --name SSH -j DROP</pre>
           <p class="cmd-note">iptables — «сырой» уровень (ufw поверх него). Правила читаются сверху вниз; порядок важен.
             Для персистентности: <code>apt install iptables-persistent</code>.</p>
           <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
@@ -1078,6 +1079,13 @@ cat /etc/passwd | grep -v nologin   # активные пользователи<
       легальных лабораторий.</p>
     <p>Сделано на чистом HTML/CSS/JS · тема хранится локально в браузере</p>
   </footer>
+
+  <!-- Back to Top Button -->
+  <button id="backToTopBtn" class="back-to-top" type="button" aria-label="Вернуться наверх" title="Вернуться наверх">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
 
   <div class="toast hidden" id="toast"></div>
   <script src="script.js"></script>

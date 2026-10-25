@@ -29,8 +29,15 @@
       const btn = e.target.closest('.card-actions button');
       if (!btn) return;
       const card = btn.closest('.cmd-card');
-      if (btn.classList.contains('act-copy')) { copyText($('pre.code', card).textContent.trim(), 'Скопировано!'); btn.classList.add('copied'); setTimeout(() => btn.classList.remove('copied'), 1200); }
-      else if (btn.classList.contains('act-link')) {
+      if (!card) return;
+      if (btn.classList.contains('act-copy')) {
+        const pre = $('pre.code', card);
+        if (pre) {
+          copyText(pre.textContent.trim(), 'Скопировано!');
+          btn.classList.add('copied');
+          setTimeout(() => btn.classList.remove('copied'), 1200);
+        }
+      } else if (btn.classList.contains('act-link')) {
         const url = location.origin + location.pathname + '#' + card.id;
         copyText(url, 'Ссылка скопирована!');
         history.replaceState(null, '', '#' + card.id);
@@ -68,7 +75,12 @@
           if (show) secVisible = true;
         });
         if ($$('.cmd-card', sec).length === 0) {
-          secVisible = !q || sec.textContent.toLowerCase().includes(q) || !activeTag;
+          if (q) {
+            secVisible = sec.textContent.toLowerCase().includes(q);
+          } else {
+            // Если выбран тег/категория — вводные секции без карточек команд скрываются, чтобы сразу был виден нужный блок
+            secVisible = !activeTag;
+          }
         } else if (q && !secVisible) {
           const headText = (sec.querySelector('.sec-head') ? sec.querySelector('.sec-head').textContent : '').toLowerCase();
           if (headText.includes(q)) secVisible = true;
@@ -79,17 +91,156 @@
       searchStatus.textContent = q ? ('Секций: ' + visible) : (activeTag ? ('#' + activeTag) : '');
     }
 
+    const CAT_TARGETS = {
+      'linux': '#linux',
+      'recon': '#recon',
+      'web': '#cmd-sqli',
+      'ad': '#cmd-ad-bloodhound',
+      'privesc': '#privesc',
+      'defense': '#defense',
+      'oneliners': '#oneliners'
+    };
+
+    function filterByTag(tag, shouldScroll = false) {
+      activeTag = (activeTag === tag) ? null : tag;
+      filterChip.textContent = activeTag ? ('#' + activeTag + ' ×') : '';
+      filterChip.classList.toggle('show', !!activeTag);
+      syncCategoryTabs();
+      applyFilters();
+
+      if (activeTag && shouldScroll) {
+        const targetSelector = CAT_TARGETS[activeTag] || ('#' + activeTag);
+        const targetEl = document.querySelector(targetSelector) || document.querySelector('#attack');
+        if (targetEl) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 30);
+        }
+      }
+    }
+
+    function syncCategoryTabs() {
+      const tabs = $$('.cat-tab');
+      if (!tabs.length) return;
+      tabs.forEach(t => {
+        const isAct = (!activeTag && t.dataset.cat === 'all') || (activeTag && t.dataset.cat === activeTag);
+        t.classList.toggle('active', !!isAct);
+        if (isAct && typeof t.scrollIntoView === 'function') {
+          t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      });
+    }
+
     searchInput.addEventListener('input', () => { query = searchInput.value; applyFilters(); });
     document.addEventListener('click', e => {
       const tag = e.target.closest('.tag-link');
       if (!tag) return;
       e.preventDefault();
-      activeTag = (activeTag === tag.dataset.tag) ? null : tag.dataset.tag;
-      filterChip.textContent = activeTag ? ('#' + activeTag + ' x') : '';
-      filterChip.classList.toggle('show', !!activeTag);
+      filterByTag(tag.dataset.tag, true);
+    });
+    filterChip.addEventListener('click', () => {
+      activeTag = null;
+      filterChip.textContent = '';
+      filterChip.classList.remove('show');
+      syncCategoryTabs();
       applyFilters();
     });
-    filterChip.addEventListener('click', () => { activeTag = null; filterChip.textContent = ''; filterChip.classList.remove('show'); applyFilters(); });
+
+    /* Category tabs */
+    $$('.cat-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const cat = tab.dataset.cat;
+        if (cat === 'all') {
+          activeTag = null;
+          filterChip.textContent = '';
+          filterChip.classList.remove('show');
+          syncCategoryTabs();
+          applyFilters();
+          const qtb = $('#quickToolbar');
+          if (qtb) qtb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (cat === 'oneliners') {
+          activeTag = null;
+          filterChip.textContent = '';
+          filterChip.classList.remove('show');
+          syncCategoryTabs();
+          applyFilters();
+          const sec = $('#oneliners');
+          if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          filterByTag(cat, true);
+        }
+      });
+    });
+
+    /* Авто-раскрытие скрытых секций при переходе по внутренним якорным ссылкам */
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href || href === '#' || href.length < 2) return;
+      try {
+        const target = document.querySelector(href);
+        if (target && (target.classList.contains('hidden') || target.closest('.hidden'))) {
+          activeTag = null;
+          query = '';
+          searchInput.value = '';
+          filterChip.textContent = '';
+          filterChip.classList.remove('show');
+          syncCategoryTabs();
+          applyFilters();
+        }
+      } catch (err) { /* ignore invalid selectors */ }
+    });
+
+    /* Dynamic RHOST / LHOST IP replacement across code cards */
+    const inputRhost = $('#inputRhost'), inputLhost = $('#inputLhost'), btnResetIp = $('#btnResetIp');
+    function updateDynamicIps() {
+      const rhost = (inputRhost && inputRhost.value.trim()) || '10.10.10.1';
+      const lhost = (inputLhost && inputLhost.value.trim()) || '10.10.14.2';
+      $$('.ph-rhost').forEach(el => el.textContent = rhost);
+      $$('.ph-lhost').forEach(el => el.textContent = lhost);
+      if (inputRhost) localStorage.setItem('csc-rhost', inputRhost.value.trim());
+      if (inputLhost) localStorage.setItem('csc-lhost', inputLhost.value.trim());
+    }
+    if (inputRhost) {
+      inputRhost.value = localStorage.getItem('csc-rhost') || '';
+      inputRhost.addEventListener('input', updateDynamicIps);
+    }
+    if (inputLhost) {
+      inputLhost.value = localStorage.getItem('csc-lhost') || '';
+      inputLhost.addEventListener('input', updateDynamicIps);
+    }
+    if (btnResetIp) {
+      btnResetIp.addEventListener('click', () => {
+        if (inputRhost) inputRhost.value = '';
+        if (inputLhost) inputLhost.value = '';
+        localStorage.removeItem('csc-rhost');
+        localStorage.removeItem('csc-lhost');
+        updateDynamicIps();
+        btnResetIp.classList.add('active');
+        setTimeout(() => btnResetIp.classList.remove('active'), 500);
+        toast('IP сброшены (RHOST: 10.10.10.1, LHOST: 10.10.14.2)');
+      });
+    }
+
+    /* Compact mode toggle */
+    const btnCompactMode = $('#btnCompactMode');
+    function setCompactMode(active) {
+      document.body.classList.toggle('compact-mode', active);
+      if (btnCompactMode) {
+        btnCompactMode.classList.toggle('active', active);
+        btnCompactMode.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+      localStorage.setItem('csc-compact', active ? '1' : '0');
+    }
+    if (localStorage.getItem('csc-compact') === '1') setCompactMode(true);
+    if (btnCompactMode) {
+      btnCompactMode.addEventListener('click', () => {
+        const next = !document.body.classList.contains('compact-mode');
+        setCompactMode(next);
+        toast(next ? 'Компактный режим (только команды)' : 'Обычный режим (с описаниями)');
+      });
+    }
 
     /* ===== мобильная поисковая панель (≤720px) — поведение как в Network-Project, стилизация токенами CyberSec ===== */
     const siteHeader = document.getElementById('siteHeader');
@@ -121,7 +272,10 @@
       closeMobileSearchPanel(); /* клик вне кнопки/панели — закрыть мобильный поиск */
     });
 
-    window.addEventListener('resize', () => { if (!isMobileViewport()) closeMobileSearchPanel(); }); /* на десктопной ширине панель бессмысленна */
+    window.addEventListener('resize', () => {
+      if (!isMobileViewport()) closeMobileSearchPanel(); /* на десктопной ширине панель бессмысленна */
+      if (window.innerWidth > 1160) closeNav(); /* при переходе на десктоп закрыть мобильную шторку */
+    });
 
     /* hotkeys */
     document.addEventListener('keydown', e => {
@@ -169,7 +323,7 @@
       '/var/www': ['html'],
       '/var/www/html': ['index.html', 'panel.php'],
       '/home': ['user'],
-      '/home/user': ['.ssh', 'notes.txt'],
+      '/home/user': ['.ssh', '.secret_flag', 'notes.txt'],
       '/home/user/.ssh': ['authorized_keys'],
       '/tmp': ['exploit.sh'],
       '/bin': ['sh', 'bash']
@@ -183,10 +337,41 @@
       '/var/www/html/index.html': '<!doctype html><html><body>shop</body></html>',
       '/var/www/html/panel.php': '<?php // suspicious file created today ?>',
       '/home/user/.ssh/authorized_keys': 'ssh-ed25519 AAAA... user@lab',
+      '/home/user/.secret_flag': 'FLAG{b4sh_m4st3r_2026}\nПоздравляем! Ты нашел скрытый флаг в домашней директории.',
       '/home/user/notes.txt': 'TODO: change password, read /etc/shadow (no access)',
       '/tmp/exploit.sh': '#!/bin/bash\necho "just a training file"',
       '/bin/sh': '[binary]', '/bin/bash': '[binary]'
     };
+
+    /* sandbox: quests */
+    const questProgress = {};
+    function completeQuest(id, msg) {
+      if (questProgress[id]) return;
+      questProgress[id] = true;
+      const qEl = $('#quest-' + id);
+      if (qEl) {
+        qEl.classList.add('completed');
+        const st = qEl.querySelector('.q-status');
+        if (st) st.textContent = '✓ Выполнен';
+      }
+      toast('🚩 ' + msg);
+    }
+
+    function checkQuests(rawLine) {
+      const c = rawLine.toLowerCase();
+      // Quest 1: Recon logs
+      if (!questProgress[1] && (c.includes('auth.log') && (c.includes('grep') || c.includes('cat') || c.includes('failed')))) {
+        completeQuest(1, 'Квест 1 пройден: IP 203.0.113.5 найден в auth.log!');
+      }
+      // Quest 2: Hidden flag in home
+      if (!questProgress[2] && (c.includes('.secret_flag') || (c.includes('ls') && (c.includes('-a') || c.includes('-la'))))) {
+        completeQuest(2, 'Квест 2 пройден: Скрытый флаг обнаружен!');
+      }
+      // Quest 3: Audit users with bash in /etc/passwd
+      if (!questProgress[3] && c.includes('/etc/passwd') && (c.includes('cat') || c.includes('grep') || c.includes('bash'))) {
+        completeQuest(3, 'Квест 3 пройден: Пользователи root и user найдены!');
+      }
+    }
 
     /* sandbox: core */
     const sbOut = $('#termBody'), sbInput = $('#termInput'), termPromptEl = $('#termPrompt');
@@ -223,6 +408,7 @@
       history.push(line);
       histPos = history.length;
       print('<span class="t-prompt">' + esc(promptStr()) + '</span>' + esc(line));
+      checkQuests(line);
 
       // Поддержка пайплайна: cmd1 | grep pattern
       let mainCmdStr = line;
@@ -346,6 +532,8 @@
 
     /* init */
     renderCardButtons();
+    updateDynamicIps();
+    syncCategoryTabs();
     print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).');
     print('Введи help для списка команд.');
     onScroll();

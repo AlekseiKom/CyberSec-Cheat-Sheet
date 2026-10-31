@@ -1,4 +1,4 @@
-    /* ============ ТОКЕНЫ / ТЕМЫ ============ */
+﻿    /* ============ ТОКЕНЫ / ТЕМЫ ============ */
     :root {
       --bg: #03050a;
       --bg2: #060a14;
@@ -196,6 +196,14 @@
       position: relative;
       flex: 1;
       max-width: 560px;
+      margin: 0 auto
+    }
+
+    .header-end {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
       margin-left: auto
     }
 
@@ -277,6 +285,104 @@
     /* мобильная кнопка поиска: на десктопе скрыта, показывается в блоке ≤720px */
     .mobile-search-btn {
       display: none
+    }
+
+    /* ============ ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ (PRO / NOVICE) ============ */
+    .mode-switch-wrap {
+      display: inline-flex;
+      align-items: center;
+      flex: none;
+    }
+
+    .mode-switch-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 3px;
+      background: rgba(8, 14, 30, .75);
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4);
+    }
+
+    [data-theme="light"] .mode-switch-btn {
+      background: rgba(228, 234, 248, .9);
+      border-color: rgba(30, 60, 140, .2);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08);
+    }
+
+    .mode-switch-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(91, 140, 255, .25), inset 0 1px 3px rgba(0, 0, 0, .3);
+    }
+
+    .mode-switch-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .mode-switch-btn .mode-pill {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      left: 3px;
+      width: calc(50% - 3px);
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 2px 8px rgba(91, 140, 255, .4);
+      transition: transform .26s cubic-bezier(0.34, 1.45, 0.64, 1), background .25s ease, box-shadow .25s ease;
+      pointer-events: none;
+    }
+
+    /* В режиме для новичков (без compact-mode): пилюля плавно смещается вправо */
+    body:not(.compact-mode) .mode-switch-btn .mode-pill {
+      transform: translateX(100%);
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, .38);
+    }
+
+    .mode-switch-btn .mode-opt {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex: 1 1 0px;
+      min-width: 74px;
+      height: 100%;
+      padding: 0 10px;
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--dim);
+      border-radius: 99px;
+      transition: color .2s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .mode-switch-btn .mode-opt svg {
+      width: 13px;
+      height: 13px;
+      flex: none;
+    }
+
+    body.compact-mode .mode-switch-btn .mode-opt-pro {
+      color: #ffffff;
+    }
+
+    body:not(.compact-mode) .mode-switch-btn .mode-opt-full {
+      color: #ffffff;
+    }
+
+    [data-theme="light"] body.compact-mode .mode-switch-btn .mode-opt-pro,
+    [data-theme="light"] body:not(.compact-mode) .mode-switch-btn .mode-opt-full {
+      color: #ffffff;
     }
 
     /* ============ РАСКЛАДКА / НАВИГАЦИЯ ============ */
@@ -641,14 +747,34 @@
       border-left: 3.5px solid #2ec4b6;
     }
 
-    /* ============ КОМПАКТНЫЙ РЕЖИМ (COMPACT MODE) ============ */
-    body.compact-mode .cmd-note,
-    body.compact-mode .tags,
-    body.compact-mode .sec-sub,
+    .cmd-card[data-tags~="pivoting"],
+    .cmd-card[data-tags~="tunnel"] {
+      border-left: 3.5px solid #38bdf8;
+    }
+
+    .cmd-card[data-tags~="evasion"],
+    .cmd-card[data-tags~="postex"] {
+      border-left: 3.5px solid #f43f5e;
+    }
+
+    /* ============ КОМПАКТНЫЙ РЕЖИМ (COMPACT PRO) ============ */
+    body.compact-mode #howto,
+    body.compact-mode #roadmap,
     body.compact-mode .why-grid,
     body.compact-mode .callout,
     body.compact-mode .glossary,
-    body.compact-mode .legal {
+    body.compact-mode .legal,
+    body.compact-mode .sec-sub,
+    body.compact-mode .cmd-note,
+    body.compact-mode .tags,
+    body.compact-mode .checklist-card,
+    body.compact-mode #cmd-ls,
+    body.compact-mode #cmd-cd,
+    body.compact-mode #cmd-cat,
+    body.compact-mode #cmd-sqli,
+    body.compact-mode #cmd-xss,
+    body.compact-mode .sidenav .nav-link[href="#howto"],
+    body.compact-mode .sidenav .nav-link[href="#roadmap"] {
       display: none !important;
     }
 
@@ -668,6 +794,35 @@
 
     body.compact-mode section.block {
       margin-bottom: 30px;
+    }
+
+    /* Плавная анимация появления теории при переключении в режим для новичков */
+    @keyframes theoryFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body:not(.compact-mode) #howto,
+    body:not(.compact-mode) #roadmap,
+    body:not(.compact-mode) .why-grid,
+    body:not(.compact-mode) .callout,
+    body:not(.compact-mode) .glossary,
+    body:not(.compact-mode) .legal,
+    body:not(.compact-mode) .sec-sub,
+    body:not(.compact-mode) .cmd-note,
+    body:not(.compact-mode) .checklist-card,
+    body:not(.compact-mode) #cmd-ls,
+    body:not(.compact-mode) #cmd-cd,
+    body:not(.compact-mode) #cmd-cat,
+    body:not(.compact-mode) #cmd-sqli,
+    body:not(.compact-mode) #cmd-xss {
+      animation: theoryFadeIn 0.3s ease-out;
     }
 
     /* ============ МИНИ-КВЕСТЫ (SANDBOX MINI-CTF) ============ */
@@ -1381,7 +1536,6 @@
     .search-status {
       font-size: .78rem;
       color: var(--dim);
-      margin-left: auto;
       white-space: nowrap
     }
 
@@ -1393,10 +1547,6 @@
       color: var(--dim);
       font-size: .85rem;
       border-top: 1px solid var(--glass-border)
-    }
-
-    #themeBtn {
-      margin-left: auto
     }
 
     /* На десктопе (>1160px) боковая навигация статически видна слева, бургер скрыт */
@@ -1540,18 +1690,50 @@
         background: rgba(247, 249, 254, .97)
       }
 
-      /* правый кластер (поиск → тема → меню) прижимается к краю шапки как единая группа: авто-отступ на первой кнопке кластера */
-      .mobile-search-btn { margin-left: auto; }
-
-      #themeBtn { margin-left: 0; }
+      /* .header-end уже имеет margin-left: auto — правый кластер прижат к краю */
 
       .icon-btn { width: 32px; height: 32px; }
+
+      .mode-switch-btn {
+        height: 32px;
+        padding: 2px;
+      }
+
+      .mode-switch-btn .mode-pill {
+        top: 2px;
+        bottom: 2px;
+        left: 2px;
+        width: calc(50% - 2px);
+      }
+
+      .mode-switch-btn .mode-opt {
+        min-width: 58px;
+        padding: 0 6px;
+        font-size: .73rem;
+        gap: 4px;
+      }
 
       .logo { font-size: .98rem; gap: 8px; }
 
       #searchInput {
         padding-right: 14px;
         font-size: .9rem
+      }
+    }
+
+    @media (max-width: 540px) {
+      .mode-switch-btn .mode-opt .mode-text {
+        display: none;
+      }
+
+      .mode-switch-btn .mode-opt {
+        min-width: 26px;
+        padding: 0 6px;
+      }
+
+      .mode-switch-btn .mode-opt svg {
+        width: 14px;
+        height: 14px;
       }
     }
 
@@ -1681,5 +1863,13 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      .mode-switch-btn .mode-text {
+        display: none;
+      }
+
+      .mode-switch-btn .mode-opt {
+        padding: 0 7px;
       }
     }

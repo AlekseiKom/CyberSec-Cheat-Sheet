@@ -95,7 +95,9 @@
       'linux': '#linux',
       'recon': '#recon',
       'web': '#cmd-sqli',
-      'ad': '#cmd-ad-bloodhound',
+      'ad': '#ad-exploitation',
+      'pivoting': '#pivoting-advanced',
+      'evasion': '#evasion-postex',
       'privesc': '#privesc',
       'defense': '#defense',
       'oneliners': '#oneliners'
@@ -223,23 +225,31 @@
       });
     }
 
-    /* Compact mode toggle */
-    const btnCompactMode = $('#btnCompactMode');
+    /* Compact / Explanations mode toggle */
+    const modeToggle = $('#modeToggle');
+
     function setCompactMode(active) {
       document.body.classList.toggle('compact-mode', active);
-      if (btnCompactMode) {
-        btnCompactMode.classList.toggle('active', active);
-        btnCompactMode.setAttribute('aria-pressed', active ? 'true' : 'false');
+      if (modeToggle) {
+        modeToggle.setAttribute('aria-pressed', active ? 'true' : 'false');
+        modeToggle.setAttribute('title', active ? 'Режим: Компактный (Pro) — кликните для перехода в режим с пояснениями' : 'Режим: С пояснениями (Для новичков) — кликните для перехода в компактный');
       }
       localStorage.setItem('csc-compact', active ? '1' : '0');
     }
-    if (localStorage.getItem('csc-compact') === '1') setCompactMode(true);
-    if (btnCompactMode) {
-      btnCompactMode.addEventListener('click', () => {
-        const next = !document.body.classList.contains('compact-mode');
-        setCompactMode(next);
-        toast(next ? 'Компактный режим (только команды)' : 'Обычный режим (с описаниями)');
-      });
+
+    /* По умолчанию: Компактный режим (Pro) */
+    const storedCompact = localStorage.getItem('csc-compact');
+    const initCompact = storedCompact === null ? true : (storedCompact === '1');
+    setCompactMode(initCompact);
+
+    function toggleDisplayMode() {
+      const next = !document.body.classList.contains('compact-mode');
+      setCompactMode(next);
+      toast(next ? '⚡ Компактный режим (Pro): только выжимка команд' : '🎓 Режим с пояснениями (Для новичков): теория и аналогии включены');
+    }
+
+    if (modeToggle) {
+      modeToggle.addEventListener('click', toggleDisplayMode);
     }
 
     /* ===== мобильная поисковая панель (≤720px) — поведение как в Network-Project, стилизация токенами CyberSec ===== */

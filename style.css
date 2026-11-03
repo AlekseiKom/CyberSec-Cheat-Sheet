@@ -1720,6 +1720,15 @@
         padding-right: 14px;
         font-size: .9rem
       }
+
+      /* тост на узких экранах: по центру под шапкой, а не прижатый к правому краю */
+      .toast {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 24px);
+        text-align: center
+      }
     }
 
     @media (max-width: 540px) {

@@ -1130,6 +1130,7 @@
     }
 
     .why-box .wb-title {
+      display: block;
       font-weight: 700;
       font-size: .8rem;
       text-transform: uppercase;
@@ -2033,5 +2034,15 @@
          без margin-left:auto кластер остаётся прижатым к правому краю, а поиск — посередине свободного пространства */
       .header-end {
         margin-left: 0;
+      }
+    }
+
+    @media (min-width: 721px) and (max-width: 1024px) {
+      .search-hint {
+        display: none;
+      }
+
+      #searchInput {
+        padding-right: 14px;
       }
     }

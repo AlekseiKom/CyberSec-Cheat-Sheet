@@ -8,7 +8,20 @@
     const themeBtn = $('#themeBtn'), iconMoon = $('#iconMoon'), iconSun = $('#iconSun');
     function applyTheme(t) { document.documentElement.dataset.theme = t; iconMoon.style.display = t === 'dark' ? '' : 'none'; iconSun.style.display = t === 'light' ? '' : 'none'; }
     applyTheme(localStorage.getItem('csc-theme') || 'dark');
-    themeBtn.addEventListener('click', () => { const cur = document.documentElement.dataset.theme; const next = cur === 'dark' ? 'light' : 'dark'; localStorage.setItem('csc-theme', next); applyTheme(next); });
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme;
+      const next = current === 'dark' ? 'light' : 'dark';
+      const updateTheme = () => {
+        localStorage.setItem('csc-theme', next);
+        applyTheme(next);
+      };
+
+      if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.startViewTransition(updateTheme);
+      } else {
+        updateTheme();
+      }
+    });
 
     /* card action buttons */
     function renderCardButtons() {
@@ -244,6 +257,7 @@
 
     function toggleDisplayMode() {
       const next = !document.body.classList.contains('compact-mode');
+      document.body.classList.add('mode-ready');
       setCompactMode(next);
       toast(next ? '⚡ Компактный режим (Pro): только выжимка команд' : '🎓 Режим с пояснениями (Для новичков): теория и аналогии включены');
     }
@@ -547,4 +561,3 @@
     print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).');
     print('Введи help для списка команд.');
     onScroll();
-

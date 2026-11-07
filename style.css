@@ -43,6 +43,41 @@
       --shadow: 0 14px 34px rgba(30, 50, 110, .16);
     }
 
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: .42s;
+      animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    ::view-transition-old(root) {
+      animation-name: theme-fade-out;
+    }
+
+    ::view-transition-new(root) {
+      animation-name: theme-fade-in;
+    }
+
+    @keyframes theme-fade-out {
+      to {
+        opacity: 0;
+        filter: blur(3px);
+      }
+    }
+
+    @keyframes theme-fade-in {
+      from {
+        opacity: 0;
+        filter: blur(3px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: .01ms;
+      }
+    }
+
     /* ============ БАЗА ============ */
     * {
       box-sizing: border-box;
@@ -509,6 +544,7 @@
       scroll-margin-top: calc(var(--header-h) + 20px);
       min-width: 0;
       max-width: 100%;
+      transition: margin-bottom .32s ease;
     }
 
     .sec-head {
@@ -804,7 +840,7 @@
 
     /* ============ ЦВЕТОВЫЕ МАРКЕРЫ КАРТОЧЕК ============ */
     .cmd-card {
-      transition: border-left-color .2s, transform .15s;
+      transition: border-left-color .2s, transform .15s, padding .32s ease, margin-bottom .32s ease;
     }
 
     .cmd-card[data-tags~="recon"] {
@@ -844,6 +880,27 @@
       border-left: 3.5px solid #f43f5e;
     }
 
+    /* Содержимое режимов плавно появляется и уходит, включая элементы с display:none. */
+    body.mode-ready #howto,
+    body.mode-ready #roadmap,
+    body.mode-ready .why-grid,
+    body.mode-ready .callout,
+    body.mode-ready .glossary,
+    body.mode-ready .legal,
+    body.mode-ready .sec-sub,
+    body.mode-ready .cmd-note,
+    body.mode-ready .tags,
+    body.mode-ready .checklist-card,
+    body.mode-ready #cmd-ls,
+    body.mode-ready #cmd-cd,
+    body.mode-ready #cmd-cat,
+    body.mode-ready #cmd-sqli,
+    body.mode-ready #cmd-xss,
+    body.mode-ready .sidenav .nav-link[href="#howto"],
+    body.mode-ready .sidenav .nav-link[href="#roadmap"] {
+      transition: opacity .32s ease, transform .32s ease, display .32s allow-discrete;
+    }
+
     /* ============ КОМПАКТНЫЙ РЕЖИМ (COMPACT PRO) ============ */
     body.compact-mode #howto,
     body.compact-mode #roadmap,
@@ -863,6 +920,8 @@
     body.compact-mode .sidenav .nav-link[href="#howto"],
     body.compact-mode .sidenav .nav-link[href="#roadmap"] {
       display: none !important;
+      opacity: 0;
+      transform: translateY(-8px);
     }
 
     body.compact-mode .cmd-card {
@@ -883,18 +942,6 @@
       margin-bottom: 30px;
     }
 
-    /* Плавная анимация появления теории при переключении в режим для новичков */
-    @keyframes theoryFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     body:not(.compact-mode) #howto,
     body:not(.compact-mode) #roadmap,
     body:not(.compact-mode) .why-grid,
@@ -909,7 +956,54 @@
     body:not(.compact-mode) #cmd-cat,
     body:not(.compact-mode) #cmd-sqli,
     body:not(.compact-mode) #cmd-xss {
-      animation: theoryFadeIn 0.3s ease-out;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @starting-style {
+      body.mode-ready:not(.compact-mode) #howto,
+      body.mode-ready:not(.compact-mode) #roadmap,
+      body.mode-ready:not(.compact-mode) .why-grid,
+      body.mode-ready:not(.compact-mode) .callout,
+      body.mode-ready:not(.compact-mode) .glossary,
+      body.mode-ready:not(.compact-mode) .legal,
+      body.mode-ready:not(.compact-mode) .sec-sub,
+      body.mode-ready:not(.compact-mode) .cmd-note,
+      body.mode-ready:not(.compact-mode) .checklist-card,
+      body.mode-ready:not(.compact-mode) #cmd-ls,
+      body.mode-ready:not(.compact-mode) #cmd-cd,
+      body.mode-ready:not(.compact-mode) #cmd-cat,
+      body.mode-ready:not(.compact-mode) #cmd-sqli,
+      body.mode-ready:not(.compact-mode) #cmd-xss,
+      body.mode-ready:not(.compact-mode) .sidenav .nav-link[href="#howto"],
+      body.mode-ready:not(.compact-mode) .sidenav .nav-link[href="#roadmap"] {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #howto,
+      #roadmap,
+      .why-grid,
+      .callout,
+      .glossary,
+      .legal,
+      .sec-sub,
+      .cmd-note,
+      .tags,
+      .checklist-card,
+      #cmd-ls,
+      #cmd-cd,
+      #cmd-cat,
+      #cmd-sqli,
+      #cmd-xss,
+      .sidenav .nav-link[href="#howto"],
+      .sidenav .nav-link[href="#roadmap"],
+      section.block,
+      .cmd-card {
+        transition: none;
+      }
     }
 
     /* ============ МИНИ-КВЕСТЫ (SANDBOX MINI-CTF) ============ */
@@ -2044,5 +2138,54 @@
 
       #searchInput {
         padding-right: 14px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .mode-switch-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 10px;
+      }
+
+      .mode-switch-btn .mode-pill,
+      .mode-switch-btn .mode-opt {
+        display: none;
+      }
+
+      .mode-switch-btn .mode-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        transition: opacity .2s ease, transform .25s cubic-bezier(.16, 1, .3, 1);
+      }
+
+      .mode-switch-btn .mode-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .mode-switch-btn .mode-icon-full {
+        color: #6ee7b7;
+      }
+
+      body.compact-mode .mode-switch-btn .mode-icon-full {
+        opacity: 0;
+        transform: scale(.7) rotate(18deg);
+      }
+
+      .mode-switch-btn .mode-icon-pro {
+        color: #93c5fd;
+        opacity: 0;
+        transform: scale(.7) rotate(-18deg);
+      }
+
+      body.compact-mode .mode-switch-btn .mode-icon-pro {
+        opacity: 1;
+        transform: none;
       }
     }

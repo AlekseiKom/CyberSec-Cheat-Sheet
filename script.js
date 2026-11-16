@@ -214,31 +214,76 @@
       } catch (err) { /* ignore invalid selectors */ }
     });
 
-    /* Dynamic RHOST / LHOST IP replacement across code cards */
+    /* Dynamic RHOST / LHOST IP replacement across code cards + URL params + validation */
     const inputRhost = $('#inputRhost'), inputLhost = $('#inputLhost'), btnResetIp = $('#btnResetIp');
-    function updateDynamicIps() {
-      const rhost = (inputRhost && inputRhost.value.trim()) || '10.10.10.1';
-      const lhost = (inputLhost && inputLhost.value.trim()) || '10.10.14.2';
+    const IP_VALID_RE = /^[a-zA-Z0-9.:_-]+$/;
+
+    function validateIpInput(input) {
+      if (!input) return true;
+      const val = input.value.trim();
+      const isValid = val === '' || IP_VALID_RE.test(val);
+      input.classList.toggle('ip-invalid', !isValid);
+      if (!isValid) {
+        input.setAttribute('aria-invalid', 'true');
+        input.title = 'Недопустимые символы: пробелы или спецсимволы могут сломать команду в терминале';
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.title = input.id === 'inputRhost'
+          ? 'Целевой IP-адрес или домен — автоматически подставляется в команды'
+          : 'IP атакующего для реверс-шеллов';
+      }
+      return isValid;
+    }
+
+    function syncIpUrlParams(rVal, lVal) {
+      try {
+        const url = new URL(window.location.href);
+        if (rVal) url.searchParams.set('rhost', rVal);
+        else url.searchParams.delete('rhost');
+        if (lVal) url.searchParams.set('lhost', lVal);
+        else url.searchParams.delete('lhost');
+        window.history.replaceState(null, '', url.toString());
+      } catch (e) { /* ignore file:// or restricted history */ }
+    }
+
+    function updateDynamicIps(syncUrl = true) {
+      const rVal = inputRhost ? inputRhost.value.trim() : '';
+      const lVal = inputLhost ? inputLhost.value.trim() : '';
+      validateIpInput(inputRhost);
+      validateIpInput(inputLhost);
+
+      const rhost = rVal || '10.10.10.1';
+      const lhost = lVal || '10.10.14.2';
       $$('.ph-rhost').forEach(el => el.textContent = rhost);
       $$('.ph-lhost').forEach(el => el.textContent = lhost);
-      if (inputRhost) localStorage.setItem('csc-rhost', inputRhost.value.trim());
-      if (inputLhost) localStorage.setItem('csc-lhost', inputLhost.value.trim());
+      if (inputRhost) localStorage.setItem('csc-rhost', rVal);
+      if (inputLhost) localStorage.setItem('csc-lhost', lVal);
+      if (syncUrl) syncIpUrlParams(rVal, lVal);
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRhost = urlParams.get('rhost');
+    const urlLhost = urlParams.get('lhost');
+
     if (inputRhost) {
-      inputRhost.value = localStorage.getItem('csc-rhost') || '';
-      inputRhost.addEventListener('input', updateDynamicIps);
+      inputRhost.value = urlRhost !== null ? urlRhost : (localStorage.getItem('csc-rhost') || '');
+      inputRhost.addEventListener('input', () => updateDynamicIps(true));
     }
     if (inputLhost) {
-      inputLhost.value = localStorage.getItem('csc-lhost') || '';
-      inputLhost.addEventListener('input', updateDynamicIps);
+      inputLhost.value = urlLhost !== null ? urlLhost : (localStorage.getItem('csc-lhost') || '');
+      inputLhost.addEventListener('input', () => updateDynamicIps(true));
     }
+    if (urlRhost !== null || urlLhost !== null) {
+      updateDynamicIps(false);
+    }
+
     if (btnResetIp) {
       btnResetIp.addEventListener('click', () => {
         if (inputRhost) inputRhost.value = '';
         if (inputLhost) inputLhost.value = '';
         localStorage.removeItem('csc-rhost');
         localStorage.removeItem('csc-lhost');
-        updateDynamicIps();
+        updateDynamicIps(true);
         btnResetIp.classList.add('active');
         setTimeout(() => btnResetIp.classList.remove('active'), 500);
         toast('IP сброшены (RHOST: 10.10.10.1, LHOST: 10.10.14.2)');

@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self';">
   <title>CyberSec Cheat Sheet — шпаргалка по кибербезопасности</title>
   <meta name="description"
     content="Практичная одностраничная памятка по кибербезопасности: Linux, разведка, атака, защита, one-liners и песочница.">
@@ -13,6 +14,7 @@
 </head>
 
 <body>
+  <canvas id="matrixBg" aria-hidden="true"></canvas>
 
   <header id="siteHeader" class="site-header">
     <a class="logo" href="#howto">
@@ -28,7 +30,7 @@
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-4.3-4.3" />
         </svg></span>
-      <input id="searchInput" type="text" placeholder="Поиск по памятке: команды, разделы, теги…" autocomplete="off">
+      <input id="searchInput" type="text" placeholder="Поиск по памятке: команды, разделы, теги…" aria-label="Поиск по памятке: команды, разделы, теги" autocomplete="off">
       <span class="search-hint"><kbd>/</kbd><kbd>Ctrl K</kbd></span>
     </div>
     <button id="filterChip" class="filter-chip" title="Сбросить фильтр по тегу"></button>

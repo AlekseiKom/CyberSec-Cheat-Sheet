@@ -30,7 +30,7 @@
         let bar = head ? $('.card-actions', head) : null;
         if (!bar) {
           bar = document.createElement('div'); bar.className = 'card-actions';
-          const mk = (cls, title, svg) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn ' + cls; b.title = title; b.innerHTML = svg; return b; };
+          const mk = (cls, title, svg) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'icon-btn ' + cls; b.title = title; b.setAttribute('aria-label', title); b.innerHTML = svg; return b; };
           bar.appendChild(mk('act-copy', 'Копировать команду', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>'));
           bar.appendChild(mk('act-link', 'Скопировать ссылку на блок', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg>'));
           (head || card).appendChild(bar);
@@ -146,7 +146,14 @@
       });
     }
 
-    searchInput.addEventListener('input', () => { query = searchInput.value; applyFilters(); });
+    let searchTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        query = searchInput.value;
+        applyFilters();
+      }, 120);
+    });
     document.addEventListener('click', e => {
       const tag = e.target.closest('.tag-link');
       if (!tag) return;
@@ -561,3 +568,76 @@
     print('CyberSec Sandbox v1.0 — учебная Linux-песочница (всё фейковое, ничего не ломается).');
     print('Введи help для списка команд.');
     onScroll();
+
+    /* CyberSec Matrix Background */
+    (function initMatrixBg() {
+      const canvas = $('#matrixBg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const chars = '01ABCDEF0123456789$#/>{}|λ';
+      const tokens = ['0x', 'SYN', 'ACK', 'SSH', 'TLS', 'AES', '443', '22', 'ROOT', 'SUDO', 'XSS', 'SQL', 'DNS'];
+      const fontSize = 14;
+      let cols = 0;
+      let drops = [];
+      let lastTime = 0;
+      const fpsInterval = 42; // ~24 fps для мягкости и экономии CPU
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        cols = Math.max(1, Math.floor(canvas.width / fontSize));
+        drops = Array.from({ length: cols }, () => Math.random() * -40);
+      }
+
+      function draw(now) {
+        if (!reducedMotion) requestAnimationFrame(draw);
+        if (document.hidden) return;
+        if (now - lastTime < fpsInterval && !reducedMotion) return;
+        lastTime = now;
+
+        const isLight = document.documentElement.dataset.theme === 'light';
+        ctx.fillStyle = isLight ? 'rgba(241, 245, 249, 0.16)' : 'rgba(3, 5, 10, 0.14)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = fontSize + 'px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const y = drops[i] * fontSize;
+          if (y > 0) {
+            const x = i * fontSize;
+            const isHead = Math.random() > 0.85;
+            if (isHead) {
+              ctx.fillStyle = isLight ? '#2563eb' : '#93c5fd';
+              ctx.shadowColor = isLight ? 'transparent' : '#5aa7ff';
+              ctx.shadowBlur = isLight ? 0 : 8;
+            } else {
+              ctx.fillStyle = isLight ? '#3b82f6' : '#1d4ed8';
+              ctx.shadowBlur = 0;
+            }
+
+            const text = Math.random() > 0.96
+              ? tokens[Math.floor(Math.random() * tokens.length)]
+              : chars[Math.floor(Math.random() * chars.length)];
+
+            ctx.fillText(text, x, y);
+            ctx.shadowBlur = 0;
+          }
+
+          if (y > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i] += 0.65;
+        }
+      }
+
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
+      if (reducedMotion) {
+        draw(0);
+      } else {
+        requestAnimationFrame(draw);
+      }
+    })();

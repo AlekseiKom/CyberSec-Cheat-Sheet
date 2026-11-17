@@ -51,7 +51,7 @@
           setTimeout(() => btn.classList.remove('copied'), 1200);
         }
       } else if (btn.classList.contains('act-link')) {
-        const url = location.origin + location.pathname + '#' + card.id;
+        const url = new URL('#' + card.id, location.href).href;
         copyText(url, 'Ссылка скопирована!');
         history.replaceState(null, '', '#' + card.id);
       }
@@ -371,16 +371,86 @@
 
     /* scrollspy */
     const navLinks = $$('.nav-link');
-    function onScroll() {
-      const y = window.scrollY + 140; let current = null;
-      $$('.block').forEach(sec => { if (sec.offsetTop <= y) current = sec.id; });
-      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+    const sidenav = $('#sidenav');
+    const sections = $$('.block[id]');
+    let activeNavLink = null;
+    let clickedNavLink = null;
+    let scrollSpyFrame = false;
+
+    function setActiveNavLink(link) {
+      if (!link || link === activeNavLink) return;
+      activeNavLink = link;
+      navLinks.forEach(item => item.classList.toggle('active', item === activeNavLink));
+
+      // Keep the active link visible inside the menu without moving the page.
+      if (!sidenav) return;
+      const menuRect = sidenav.getBoundingClientRect();
+      const linkRect = activeNavLink.getBoundingClientRect();
+      if (linkRect.top < menuRect.top) {
+        sidenav.scrollBy({ top: linkRect.top - menuRect.top - 8, behavior: 'smooth' });
+      } else if (linkRect.bottom > menuRect.bottom) {
+        sidenav.scrollBy({ top: linkRect.bottom - menuRect.bottom + 8, behavior: 'smooth' });
+      }
     }
-    let scrollTm = null;
-    window.addEventListener('scroll', () => { if (scrollTm) return; scrollTm = setTimeout(() => { onScroll(); scrollTm = null; }, 80); });
+
+    function releaseClickedNavLink() {
+      if (!clickedNavLink) return;
+      clickedNavLink = null;
+      scheduleScrollSpy();
+    }
+
+    navLinks.forEach(link => link.addEventListener('click', () => {
+      clickedNavLink = link;
+      setActiveNavLink(link);
+    }));
+    window.addEventListener('pointerdown', releaseClickedNavLink, { passive: true });
+    window.addEventListener('wheel', releaseClickedNavLink, { passive: true });
+    window.addEventListener('touchstart', releaseClickedNavLink, { passive: true });
+    window.addEventListener('keydown', e => {
+      if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(e.key)) return;
+      if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) return;
+      releaseClickedNavLink();
+    });
+
+    function onScroll() {
+      scrollSpyFrame = false;
+      if (clickedNavLink) return;
+      const headerBottom = document.getElementById('siteHeader')?.getBoundingClientRect().bottom || 0;
+      const activationLine = headerBottom + 24;
+      let current = null;
+      let currentTop = -Infinity;
+
+      sections.forEach(section => {
+        const top = section.getBoundingClientRect().top;
+        if (top <= activationLine && top > currentTop) {
+          current = section;
+          currentTop = top;
+        }
+      });
+
+      if (!current) {
+        current = sections.reduce((first, section) => (
+          section.getBoundingClientRect().top < first.getBoundingClientRect().top ? section : first
+        ));
+      }
+
+      const nextActiveLink = current && navLinks.find(link => link.getAttribute('href') === '#' + current.id);
+      if (!nextActiveLink || nextActiveLink === activeNavLink) return;
+      setActiveNavLink(nextActiveLink);
+    }
+
+    function scheduleScrollSpy() {
+      if (scrollSpyFrame) return;
+      scrollSpyFrame = true;
+      requestAnimationFrame(onScroll);
+    }
+
+    window.addEventListener('scroll', scheduleScrollSpy, { passive: true });
+    window.addEventListener('resize', scheduleScrollSpy);
+    scheduleScrollSpy();
 
     /* burger menu (mobile sidenav) */
-    const sidenav = $('#sidenav'), navOverlay = $('#navOverlay');
+    const navOverlay = $('#navOverlay');
     function closeNav() { sidenav.classList.remove('open'); navOverlay.classList.remove('show'); }
     $('#burgerBtn').addEventListener('click', () => {
       if (!sidenav.classList.contains('open')) closeMobileSearchPanel(); /* при открытии меню закрыть мобильный поиск */
@@ -553,7 +623,6 @@
           break;
         }
         case 'find': {
-          const nonFlags = args.filter(a => !a.startsWith('-') || a === '-name');
           const start = (args[0] && !args[0].startsWith('-')) ? normPath(args[0]) : cwd;
           let name = null;
           for (let i = 0; i < args.length - 1; i++) { if (args[i] === '-name') name = args[i + 1].replace(/['"]/g, ''); }
